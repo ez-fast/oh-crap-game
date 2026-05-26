@@ -278,7 +278,7 @@ It is not supposed to do that.
   };
 
   return (
-    <div className={`min-h-screen bg-slate-950 text-white p-6 flex items-center justify-center ${shake ? "animate-pulse" : ""}`}>
+    <div className={`min-h-screen bg-slate-950 text-white p-6 flex items-center justify-center ${shake ? "animate-shake" : ""}`}>
       <div className="w-full max-w-4xl bg-slate-900 p-8 rounded-3xl border border-slate-700">
 
         <h1 className="text-4xl font-bold text-red-400 mb-4">
