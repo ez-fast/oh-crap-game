@@ -34,10 +34,15 @@ export default function OhCrapGame() {
   const [mode, setMode] = React.useState('calm');
 
   // =========================
-  // VISUAL STATE ENGINE (NEW)
+  // MULTI START SYSTEM (FIXED)
+  // =========================
+  const startNodes = ['start', 'kitchenStart', 'waterHeaterStart'];
+
+  // =========================
+  // VISUAL ENGINE (IMPROVED)
   // =========================
   const getVisualMode = () => {
-    if (state.flood > 60 || mode === 'disaster') return 'flood';
+    if (state.flood > 70 || mode === 'disaster') return 'flood';
     if (state.flood > 30 || mode === 'warning') return 'warning';
     return 'calm';
   };
@@ -56,7 +61,7 @@ export default function OhCrapGame() {
   ];
 
   // =========================
-  // STORY
+  // STORY (RESTORED BRANCHING)
   // =========================
   const story = {
     start: {
@@ -65,6 +70,24 @@ export default function OhCrapGame() {
       choices: [
         { text: "Call EZ-FAST Plumbing", next: "end_good", damage: -10, stress: -15, wallet: -250 },
         { text: "Try DIY plunging", next: "bathroom", damage: 15, stress: 20, wallet: 0 }
+      ]
+    },
+
+    kitchenStart: {
+      title: "OH CRAP! — Kitchen Disaster",
+      text: "The garbage disposal groans violently...",
+      choices: [
+        { text: "Call EZ-FAST Plumbing", next: "end_rescue", damage: -5, stress: -10, wallet: -300 },
+        { text: "Reach inside carefully", next: "disaster", damage: 25, stress: 25, wallet: -80 }
+      ]
+    },
+
+    waterHeaterStart: {
+      title: "OH CRAP! — Water Heater Leak",
+      text: "You hear hissing from the garage...",
+      choices: [
+        { text: "Call EZ-FAST Plumbing", next: "end_good", damage: -10, stress: -10, wallet: -350 },
+        { text: "Tap it gently", next: "disaster", damage: 35, stress: 30, wallet: -120 }
       ]
     },
 
@@ -86,28 +109,31 @@ export default function OhCrapGame() {
       ]
     },
 
+    // =========================
+    // ENDINGS
+    // =========================
     end_good: {
       ending: true,
       title: "Professional Victory",
-      text: "Everything is fixed cleanly and quickly."
+      text: "EZ-FAST fixes everything cleanly and efficiently."
     },
 
     end_rescue: {
       ending: true,
       title: "Narrow Escape",
-      text: "You avoided major damage."
+      text: "Disaster avoided at the last moment."
     },
 
     end_late: {
       ending: true,
       title: "Expensive Lesson",
-      text: "It got fixed… but at a cost."
+      text: "Fixed… but the damage was already done."
     },
 
     end_bad: {
       ending: true,
       title: "TOTAL DISASTER",
-      text: "The house will never be the same."
+      text: "Everything is beyond saving."
     }
   };
 
@@ -123,7 +149,7 @@ export default function OhCrapGame() {
   };
 
   // =========================
-  // CHOICE ENGINE
+  // CHOICE ENGINE (FIXED + STABLE)
   // =========================
   const choose = (c) => {
     play('click');
@@ -151,41 +177,42 @@ export default function OhCrapGame() {
   };
 
   // =========================
-  // RESET
+  // RESET (RANDOM START FIXED)
   // =========================
   const reset = () => {
-    setNode('start');
+    const randomStart =
+      startNodes[Math.floor(Math.random() * startNodes.length)];
+
+    setNode(randomStart);
     setState({ damage: 0, stress: 0, wallet: 0, flood: 0, chaos: 0 });
     setEvent('');
     setMode('calm');
   };
 
   // =========================
-  // VISUAL PANEL (NEW ANIMATIONS)
+  // VISUAL PANEL (IMPROVED ANIMATIONS)
   // =========================
   const VisualPanel = () => {
     return (
-      <div className="w-full h-full flex items-center justify-center relative">
+      <div className="w-full h-full flex items-center justify-center text-center">
 
-        {/* CALM */}
         {visualMode === 'calm' && (
-          <div className="text-blue-300 animate-pulse text-center">
-            💧 Subtle plumbing hum...
+          <div className="text-blue-300 animate-pulse">
+            💧 Pipes humming softly...
           </div>
         )}
 
-        {/* WARNING */}
         {visualMode === 'warning' && (
-          <div className="text-yellow-300 animate-bounce text-center">
-            🚰 Pipes under pressure...
+          <div className="text-yellow-300 animate-bounce">
+            🚰 Pressure building...<br />
+            Something is not right.
           </div>
         )}
 
-        {/* FLOOD */}
         {visualMode === 'flood' && (
-          <div className="text-red-400 animate-pulse text-center">
+          <div className="text-red-400 animate-pulse font-bold text-lg">
             🌊 SYSTEM FAILURE<br />
-            Water rising...
+            Water levels critical
           </div>
         )}
 
@@ -196,9 +223,9 @@ export default function OhCrapGame() {
   return (
     <div className={`min-h-screen flex items-center justify-center p-6 bg-slate-950 text-white ${shake ? "animate-shake" : ""}`}>
 
-      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="w-full max-w-6xl grid md:grid-cols-2 gap-6">
 
-        {/* LEFT GAME PANEL */}
+        {/* LEFT GAME */}
         <div className="bg-slate-900 p-8 rounded-3xl border border-slate-700">
 
           <h1 className="text-3xl font-bold text-red-400 mb-3">
@@ -227,7 +254,7 @@ export default function OhCrapGame() {
                 <button
                   key={i}
                   onClick={() => choose(c)}
-                  className="w-full p-4 bg-slate-800 hover:bg-slate-700 rounded-xl"
+                  className="w-full p-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition"
                 >
                   {c.text}
                 </button>
@@ -253,7 +280,7 @@ export default function OhCrapGame() {
           )}
         </div>
 
-        {/* RIGHT VISUAL PANEL */}
+        {/* RIGHT VISUALS */}
         <div className="bg-slate-950 border border-slate-800 rounded-3xl p-8 flex items-center justify-center min-h-[300px]">
           <VisualPanel />
         </div>
