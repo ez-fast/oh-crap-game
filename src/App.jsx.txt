@@ -18,194 +18,166 @@ export default function OhCrapGame() {
   };
 
   // =========================
-  // AI GAME STATE ENGINE
+  // WORLD STATE
   // =========================
   const [state, setState] = React.useState({
     damage: 0,
     stress: 0,
     wallet: 0,
-    flood: 0,
     chaos: 0,
-    riskProfile: 0 // 🔥 NEW: AI tracks player behavior
+    mistakes: 0
   });
 
   const [node, setNode] = React.useState('start');
   const [event, setEvent] = React.useState('');
   const [shake, setShake] = React.useState(false);
-  const [mode, setMode] = React.useState('calm');
 
   // =========================
-  // AI DIRECTOR (CORE SYSTEM)
+  // COMEDY ENGINE CORE
   // =========================
-  const aiDirector = () => {
-    const chaos = state.chaos;
+  const humorTones = ["dry", "chaotic", "sarcastic", "absurd"];
+  const personalities = ["confidentDIY", "panic", "denial", "overthinker"];
 
-    if (chaos > 180) return "catastrophe";
-    if (chaos > 120) return "critical";
-    if (chaos > 70) return "unstable";
-    return "stable";
-  };
-
-  const aiState = aiDirector();
+  const getTone = () => humorTones[Math.floor(Math.random() * humorTones.length)];
+  const getPersonality = () => personalities[Math.floor(Math.random() * personalities.length)];
 
   // =========================
-  // VISUAL SYSTEM (AI DRIVEN)
+  // RANDOM INTERRUPT EVENTS (COMEDY LAYER)
   // =========================
-  const visualMode = (() => {
-    if (aiState === "catastrophe") return "flood";
-    if (aiState === "critical") return "warning";
-    return "calm";
-  })();
-
-  // =========================
-  // RANDOM EVENTS (AI WEIGHTED)
-  // =========================
-  const events = {
-    stable: [
-      "A pipe hums quietly...",
-      "Normal water pressure detected.",
-      "Minor drip in the background."
-    ],
-    unstable: [
-      "Pressure spikes in the system...",
-      "You hear water moving behind walls...",
-      "Something just rattled inside the pipes..."
-    ],
-    critical: [
-      "Multiple drains are reacting at once...",
-      "The floor feels warm and wet...",
-      "Water pressure is violently unstable..."
-    ],
-    catastrophe: [
-      "SYSTEM FAILURE IMMINENT...",
-      "Water is now moving THROUGH walls...",
-      "Everything is actively flooding..."
-    ]
-  };
+  const events = [
+    "Your neighbor texts: 'Hey is your house supposed to sound like that?'",
+    "Your dog refuses to enter the bathroom.",
+    "The house makes a noise that sounds like judgment.",
+    "Your spouse appears silently behind you.",
+    "You briefly consider moving."
+  ];
 
   const triggerEvent = () => {
-    const pool = events[aiState];
-    if (Math.random() < 0.5) {
-      setEvent(pool[Math.floor(Math.random() * pool.length)]);
+    if (Math.random() < 0.45) {
+      setEvent(events[Math.floor(Math.random() * events.length)]);
     } else setEvent('');
   };
 
   // =========================
-  // AI STORY ENGINE (ADAPTIVE DIFFICULTY)
+  // EZ-FAST CHARACTER ENGINE
+  // =========================
+  const ezFastLine = (chaos) => {
+    const lines = [
+      "EZ-FAST: 'Yep. Classic confidence-based plumbing failure.'",
+      "EZ-FAST: 'I’ve seen worse. Not much worse, but worse.'",
+      "EZ-FAST: 'Who told you to do that? No, seriously.'",
+      "EZ-FAST: 'This pipe is now emotionally compromised.'",
+      "EZ-FAST: 'Good news: it’s fixable. Bad news: you did all of it.'"
+    ];
+
+    return lines[Math.min(Math.floor(chaos / 25), lines.length - 1)];
+  };
+
+  // =========================
+  // STORY ENGINE (COMEDY TEMPLATE SYSTEM)
+  // =========================
+  const baseScenarios = {
+    start: "You flush the toilet upstairs and immediately hear something downstairs respond emotionally.",
+    kitchen: "The sink begins making noises that suggest it has opinions.",
+    bathroom: "Water behavior becomes… increasingly philosophical.",
+    disaster: "The house stops pretending everything is fine."
+  };
+
+  const enrichText = (base, tone, personality) => {
+    const spice = {
+      dry: "It is not going well.",
+      chaotic: "Everything is worse than it should be and also louder.",
+      sarcastic: "This is definitely a 'great idea' moment.",
+      absurd: "Reality briefly forgets how plumbing works."
+    };
+
+    const vibe = {
+      confidentDIY: "You are absolutely sure this is a simple fix.",
+      panic: "You are no longer confident in anything.",
+      denial: "This is probably normal.",
+      overthinker: "You are now analyzing pipe psychology."
+    };
+
+    return `${base}
+
+(${spice[tone]} ${vibe[personality]})`;
+  };
+
+  // =========================
+  // STORY NODES
   // =========================
   const story = {
     start: {
-      title: "OH CRAP! — Toilet Overflow",
-      text: "Water rises fast. The system is reacting unpredictably.",
+      title: "OH CRAP! — Domestic Confidence Test",
+      base: baseScenarios.start,
       choices: [
-        {
-          text: "Call EZ-FAST Plumbing",
-          next: "end_good",
-          damage: -10,
-          stress: -15,
-          wallet: -250
-        },
-        {
-          text: "Try DIY plunging",
-          next: "bathroom",
-          damage: 15,
-          stress: 20,
-          wallet: 0
-        }
+        { text: "Call EZ-FAST Plumbing", next: "good", damage: -10, stress: -15, wallet: -250 },
+        { text: "Fix it yourself (confidently)", next: "bathroom", damage: 15, stress: 20, wallet: 0 }
       ]
     },
 
     bathroom: {
-      title: "Bathroom Escalation",
-      text: "The AI detects pressure instability spreading.",
+      title: "Bathroom Escalation Event",
+      base: baseScenarios.bathroom,
       choices: [
-        {
-          text: "Call EZ-FAST Plumbing",
-          next: "end_rescue",
-          damage: -10,
-          stress: -15,
-          wallet: -400
-        },
-        {
-          text: "Push system harder (DIY)",
-          next: "disaster",
-          damage: 30 + state.riskProfile,
-          stress: 25 + state.riskProfile,
-          wallet: -120
-        }
+        { text: "Call EZ-FAST Plumbing", next: "rescue", damage: -10, stress: -10, wallet: -400 },
+        { text: "Continue DIY experiment", next: "disaster", damage: 35, stress: 30, wallet: -120 }
+      ]
+    },
+
+    kitchen: {
+      title: "Kitchen Has Opinions",
+      base: baseScenarios.kitchen,
+      choices: [
+        { text: "Call EZ-FAST Plumbing", next: "rescue", damage: -5, stress: -10, wallet: -300 },
+        { text: "Investigate aggressively", next: "disaster", damage: 25, stress: 25, wallet: -80 }
       ]
     },
 
     disaster: {
-      title: "AI DETECTED SYSTEM FAILURE",
-      text: "Multiple failure points are now active.",
+      title: "SYSTEM ENTERS EMOTIONAL DISTRESS",
+      base: baseScenarios.disaster,
       choices: [
-        {
-          text: "Call EZ-FAST Plumbing (Emergency Mode)",
-          next: "end_late",
-          damage: 10,
-          stress: 10,
-          wallet: -800
-        },
-        {
-          text: "Force manual override",
-          next: "end_bad",
-          damage: 60 + state.riskProfile,
-          stress: 60 + state.riskProfile,
-          wallet: -2000
-        }
+        { text: "Call EZ-FAST Plumbing (admit defeat)", next: "late", damage: 10, stress: 10, wallet: -800 },
+        { text: "Make it worse experimentally", next: "bad", damage: 60, stress: 60, wallet: -2000 }
       ]
     },
 
     // =========================
     // ENDINGS
     // =========================
-    end_good: {
+    good: {
       ending: true,
-      title: "Professional Victory",
-      text: "EZ-FAST neutralizes the issue before escalation."
+      title: "Professional Intervention",
+      base: "EZ-FAST arrives, nods once, and fixes everything with disturbing efficiency."
     },
 
-    end_rescue: {
+    rescue: {
       ending: true,
       title: "Narrow Escape",
-      text: "AI predicts full failure—intervention prevents disaster."
+      base: "You avoided catastrophe. The house forgives you slightly."
     },
 
-    end_late: {
+    late: {
       ending: true,
-      title: "Expensive Lesson",
-      text: "System restored, but damage was partially irreversible."
+      title: "Financial Emotional Damage",
+      base: "Everything is fixed. Your wallet is not."
     },
 
-    end_bad: {
+    bad: {
       ending: true,
-      title: "TOTAL SYSTEM COLLAPSE",
-      text: "AI prediction confirmed: full structural failure."
+      title: "TOTAL PLUMBING APOCALYPSE",
+      base: "Even the pipes are now questioning your decisions."
     }
   };
 
   const current = story[node];
 
   // =========================
-  // AI DIRECTOR UPDATE (LEARNING LOOP)
-  // =========================
-  const updateRiskProfile = (choice) => {
-    let risk = state.riskProfile;
-
-    if (choice.damage > 25) risk += 2;
-    if (choice.text.toLowerCase().includes("diy")) risk += 3;
-    if (choice.text.toLowerCase().includes("call")) risk -= 1;
-
-    return Math.max(0, Math.min(20, risk));
-  };
-
-  // =========================
-  // CHOICE ENGINE (AI DRIVEN)
+  // COMEDY CHOICE ENGINE
   // =========================
   const choose = (c) => {
     play('click');
-
     triggerEvent();
 
     if (c.damage > 30) {
@@ -214,15 +186,12 @@ export default function OhCrapGame() {
       setTimeout(() => setShake(false), 400);
     }
 
-    setMode(aiState);
-
     setState(prev => ({
       damage: Math.max(0, prev.damage + c.damage),
       stress: Math.max(0, prev.stress + c.stress),
       wallet: prev.wallet + c.wallet,
-      flood: Math.min(100, prev.flood + c.damage),
       chaos: prev.chaos + c.damage + c.stress,
-      riskProfile: updateRiskProfile(c)
+      mistakes: prev.mistakes + (c.text.toLowerCase().includes("diy") ? 1 : 0)
     }));
 
     setNode(c.next);
@@ -233,54 +202,24 @@ export default function OhCrapGame() {
   // =========================
   const reset = () => {
     setNode('start');
-    setState({
-      damage: 0,
-      stress: 0,
-      wallet: 0,
-      flood: 0,
-      chaos: 0,
-      riskProfile: 0
-    });
+    setState({ damage: 0, stress: 0, wallet: 0, chaos: 0, mistakes: 0 });
     setEvent('');
-    setMode('calm');
   };
 
   // =========================
-  // VISUAL PANEL (AI DRIVEN ANIMATIONS)
+  // RENDERED STORY TEXT (COMEDY ENGINE OUTPUT)
   // =========================
-  const VisualPanel = () => {
-    return (
-      <div className="w-full h-full flex items-center justify-center text-center">
+  const tone = getTone();
+  const personality = getPersonality();
 
-        {visualMode === 'calm' && (
-          <div className="text-blue-300 animate-pulse">
-            💧 Stable flow detected
-          </div>
-        )}
-
-        {visualMode === 'warning' && (
-          <div className="text-yellow-300 animate-bounce">
-            🚰 Pressure instability rising...
-          </div>
-        )}
-
-        {visualMode === 'flood' && (
-          <div className="text-red-400 animate-pulse font-bold">
-            🌊 SYSTEM COLLAPSE<br />
-            AI predicts failure imminent
-          </div>
-        )}
-
-      </div>
-    );
-  };
+  const renderedText = enrichText(current.base, tone, personality);
 
   return (
     <div className={`min-h-screen flex items-center justify-center p-6 bg-slate-950 text-white ${shake ? "animate-shake" : ""}`}>
 
       <div className="w-full max-w-6xl grid md:grid-cols-2 gap-6">
 
-        {/* GAME PANEL */}
+        {/* GAME */}
         <div className="bg-slate-900 p-8 rounded-3xl border border-slate-700">
 
           <h1 className="text-3xl font-bold text-red-400 mb-3">
@@ -294,14 +233,13 @@ export default function OhCrapGame() {
           )}
 
           <p className="mb-6 text-slate-200 whitespace-pre-line">
-            {current.text}
+            {renderedText}
           </p>
 
-          {/* AI STATUS HUD */}
           <div className="grid grid-cols-3 gap-2 text-xs text-slate-300 mb-6">
             <div>Chaos: {state.chaos}</div>
-            <div>Risk AI: {state.riskProfile}</div>
-            <div>Mode: {aiState}</div>
+            <div>Mistakes: {state.mistakes}</div>
+            <div>Stress: {state.stress}</div>
           </div>
 
           {!current.ending ? (
@@ -320,26 +258,46 @@ export default function OhCrapGame() {
             <div className="text-center space-y-4">
 
               <div className="text-green-300 font-semibold">
-                AI simulation complete.
+                {ezFastLine(state.chaos)}
               </div>
 
               <button
                 onClick={reset}
                 className="w-full p-4 bg-red-600 rounded-xl"
               >
-                Run Simulation Again
+                Restart Reality Simulation
               </button>
 
               <div className="text-xs text-slate-400">
-                Final Chaos Index: {state.chaos}
+                Chaos Index: {state.chaos}
               </div>
             </div>
           )}
         </div>
 
-        {/* VISUAL PANEL */}
-        <div className="bg-slate-950 border border-slate-800 rounded-3xl p-8 flex items-center justify-center min-h-[300px]">
-          <VisualPanel />
+        {/* VISUAL SIDE PANEL (PURE COMEDY FEELING) */}
+        <div className="bg-slate-950 border border-slate-800 rounded-3xl p-8 flex items-center justify-center">
+
+          {state.chaos < 40 && (
+            <div className="text-blue-300 animate-pulse text-center">
+              🟢 Everything seems fine… suspiciously fine.
+            </div>
+          )}
+
+          {state.chaos >= 40 && state.chaos < 100 && (
+            <div className="text-yellow-300 animate-bounce text-center">
+              🟡 Reality is wobbling<br />
+              Pipes are developing opinions
+            </div>
+          )}
+
+          {state.chaos >= 100 && (
+            <div className="text-red-400 animate-pulse text-center font-bold">
+              🔴 SYSTEM HAS DEVELOPED PERSONALITY<br />
+              You are no longer in control
+            </div>
+          )}
+
         </div>
 
       </div>
