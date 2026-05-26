@@ -14,7 +14,7 @@ export default function OhCrapGame() {
   };
 
   // =========================
-  // WORLD STATE SYSTEM
+  // WORLD STATE (VERSION 2)
   // =========================
   const [state, setState] = React.useState({
     damage: 0,
@@ -33,7 +33,7 @@ export default function OhCrapGame() {
   const [achievement, setAchievement] = React.useState('');
 
   // =========================
-  // RANDOM EVENTS
+  // RANDOM + PROCEDURAL EVENTS
   // =========================
   const randomEvents = [
     "A neighbor gives unsolicited plumbing advice.",
@@ -44,31 +44,23 @@ export default function OhCrapGame() {
     "A YouTube plumber contradicts your plan."
   ];
 
+  const proceduralEvents = [
+    (s) => s.damage > 40 && "You hear water running inside the walls...",
+    (s) => s.stress > 50 && "Your spouse has stopped speaking in full sentences.",
+    (s) => s.chaosLevel > 60 && "Something is dripping that wasn't dripping before.",
+    () => Math.random() < 0.25 && "A neighbor is watching your house suspiciously...",
+    () => Math.random() < 0.2 && "You briefly consider moving out."
+  ];
+
   // =========================
-  // EZ-FAST RESCUE ENGINE (NEW)
+  // EZ-FAST RESCUE ENGINE
   // =========================
   const generateRescueOutcome = () => {
     const outcomes = [
-      {
-        text: "EZ-FAST dispatch arrives within 40 minutes and quickly stabilizes the system with no additional damage.",
-        stress: -15,
-        bonus: 0
-      },
-      {
-        text: "A senior technician identifies the issue early and prevents what could have become a major failure.",
-        stress: -20,
-        bonus: 75
-      },
-      {
-        text: "Emergency service arrives promptly. The blockage is cleared and the system is fully restored.",
-        stress: -12,
-        bonus: 0
-      },
-      {
-        text: "Technician explains the root cause and performs a preventive fix that saves you future repairs.",
-        stress: -18,
-        bonus: 50
-      }
+      { text: "Fast stabilization with no added damage.", stress: -15, bonus: 0 },
+      { text: "Early diagnosis prevents escalation.", stress: -20, bonus: 75 },
+      { text: "System fully restored quickly.", stress: -12, bonus: 0 },
+      { text: "Preventive fix avoids future repair costs.", stress: -18, bonus: 50 }
     ];
 
     return outcomes[Math.floor(Math.random() * outcomes.length)];
@@ -83,13 +75,7 @@ export default function OhCrapGame() {
   const storyNodes = {
     start: {
       title: "OH CRAP! — Toilet Backup",
-      text: `
-You flush the upstairs toilet.
-
-Nothing happens.
-
-Then everything happens.
-      `,
+      text: `You flush the upstairs toilet. Nothing happens. Then everything happens.`,
       choices: [
         { text: "Call EZ-FAST Plumbing", next: "goodEnding", damage: -5, stress: -10, wallet: -250 },
         { text: "Try DIY plunging", next: "plungerAttempt", damage: 10, stress: 15, wallet: 0 }
@@ -98,29 +84,10 @@ Then everything happens.
 
     kitchenStart: {
       title: "OH CRAP! — Kitchen Disaster",
-      text: `
-The garbage disposal makes a horrifying noise.
-
-The sink fills up faster than it drains.
-      `,
+      text: `The garbage disposal makes a horrifying noise.`,
       choices: [
         { text: "Call EZ-FAST Plumbing", next: "goodEnding", damage: -5, stress: -10, wallet: -250 },
         { text: "Reach in carefully", next: "disposalDisaster", damage: 20, stress: 25, wallet: -50 }
-      ]
-    },
-
-    waterHeaterStart: {
-      title: "OH CRAP! — Water Heater Leak",
-      text: `
-You hear hissing from the garage.
-
-The water heater is leaking.
-
-It is not supposed to do that.
-      `,
-      choices: [
-        { text: "Call EZ-FAST Plumbing", next: "goodEnding", damage: -5, stress: -10, wallet: -300 },
-        { text: "Tap it lightly", next: "heaterExplosion", damage: 30, stress: 25, wallet: -100 }
       ]
     },
 
@@ -151,17 +118,7 @@ It is not supposed to do that.
       ]
     },
 
-    heaterExplosion: {
-      title: "Water Heater Regret",
-      text: `The leak becomes… more confident.`,
-      choices: [
-        { text: "Call EZ-FAST Plumbing", next: "lateRescueEnding", damage: 15, stress: 15, wallet: -800 }
-      ]
-    },
-
-    // =========================
     // ENDINGS
-    // =========================
     goodEnding: {
       ending: true,
       title: "Professional Victory",
@@ -188,61 +145,64 @@ It is not supposed to do that.
   };
 
   const node = storyNodes[currentNode];
-  const startNodes = ['start', 'kitchenStart', 'waterHeaterStart'];
+  const startNodes = ['start', 'kitchenStart'];
 
   // =========================
-  // HANDLE CHOICE (UPDATED)
+  // HANDLE CHOICE (VERSION 2 ENGINE)
   // =========================
   const handleChoice = (choice) => {
     playSound('click');
 
-    if (Math.random() < 0.35) {
-      setEvent(randomEvents[Math.floor(Math.random() * randomEvents.length)]);
+    // Procedural event injection
+    const eventPool = proceduralEvents
+      .map(fn => fn(state))
+      .filter(Boolean);
+
+    if (Math.random() < 0.5 && eventPool.length > 0) {
+      setEvent(eventPool[Math.floor(Math.random() * eventPool.length)]);
     } else {
-      setEvent('');
+      setEvent(randomEvents[Math.floor(Math.random() * randomEvents.length)]);
     }
 
-    if (choice.damage >= 25) {
-      setShake(true);
-      playSound('disaster');
-      setTimeout(() => setShake(false), 500);
-    }
+    const isEZFAST = isCallEzFast(choice.text);
 
-    // =========================
-    // EZ-FAST CALL ENHANCED LOGIC
-    // =========================
-    if (isCallEzFast(choice.text)) {
+    // EZ-FAST = recovery mechanic
+    if (isEZFAST) {
       const result = generateRescueOutcome();
 
-      setEvent(`🚨 EZ-FAST Dispatch: ${result.text}`);
+      playSound('success');
+
+      setEvent(`🚨 EZ-FAST: ${result.text}`);
 
       setState(prev => ({
         ...prev,
         stress: Math.max(0, prev.stress + result.stress),
         wallet: prev.wallet + choice.wallet + result.bonus,
         damage: Math.max(0, prev.damage - 10),
-        insuranceRisk: Math.max(0, prev.insuranceRisk - 5),
-        chaosLevel: prev.chaosLevel + 2
+        chaosLevel: Math.max(0, prev.chaosLevel - 10)
       }));
 
-      setTimeout(() => {
-        setCurrentNode(choice.next);
-      }, 1200);
-
+      setTimeout(() => setCurrentNode(choice.next), 1000);
       return;
     }
 
-    // =========================
-    // NORMAL PATH
-    // =========================
+    // Shake logic
+    if (choice.damage >= 20 || state.chaosLevel > 50) {
+      setShake(true);
+      playSound('disaster');
+      setTimeout(() => setShake(false), 400);
+    }
+
+    // Normal state update
     setState(prev => ({
+      ...prev,
       damage: Math.max(0, prev.damage + choice.damage),
       stress: Math.max(0, prev.stress + choice.stress),
       wallet: prev.wallet + choice.wallet,
-      flood: Math.min(100, prev.flood + choice.damage),
-      dogMood: Math.max(0, prev.dogMood - choice.damage * 0.4),
-      spouseTrust: Math.max(0, prev.spouseTrust - choice.stress * 0.5),
-      insuranceRisk: prev.insuranceRisk + choice.damage * 0.6,
+      flood: Math.min(100, prev.flood + Math.max(0, choice.damage)),
+      dogMood: Math.max(0, prev.dogMood - choice.damage * 0.3),
+      spouseTrust: Math.max(0, prev.spouseTrust - choice.stress * 0.4),
+      insuranceRisk: prev.insuranceRisk + choice.damage * 0.5,
       chaosLevel: prev.chaosLevel + choice.damage + choice.stress
     }));
 
@@ -257,9 +217,7 @@ It is not supposed to do that.
   // RESTART
   // =========================
   const restartGame = () => {
-    const randomStart =
-      startNodes[Math.floor(Math.random() * startNodes.length)];
-
+    const randomStart = startNodes[Math.floor(Math.random() * startNodes.length)];
     setCurrentNode(randomStart);
 
     setState({
@@ -277,6 +235,9 @@ It is not supposed to do that.
     setAchievement('');
   };
 
+  // =========================
+  // UI
+  // =========================
   return (
     <div className={`min-h-screen bg-slate-950 text-white p-6 flex items-center justify-center ${shake ? "animate-shake" : ""}`}>
       <div className="w-full max-w-4xl bg-slate-900 p-8 rounded-3xl border border-slate-700">
