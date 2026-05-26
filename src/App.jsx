@@ -3,7 +3,7 @@ import React from 'react';
 export default function OhCrapGame() {
 
   // =========================
-  // SOUND ENGINE V3
+  // SOUND ENGINE V3.1
   // =========================
   const sound = {
     click: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
@@ -19,7 +19,7 @@ export default function OhCrapGame() {
   };
 
   // =========================
-  // WORLD STATE V3
+  // WORLD STATE
   // =========================
   const [state, setState] = React.useState({
     damage: 0,
@@ -33,30 +33,30 @@ export default function OhCrapGame() {
   const [event, setEvent] = React.useState('');
   const [shake, setShake] = React.useState(false);
   const [ending, setEnding] = React.useState('');
+  const [mode, setMode] = React.useState('calm');
 
   // =========================
-  // VISUAL SCENES
+  // BACKGROUNDS
   // =========================
   const backgrounds = {
     start: "https://images.unsplash.com/photo-1581578731548-c64695cc6952",
-    kitchen: "https://images.unsplash.com/photo-1556911220-bff31c812dba",
     bathroom: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a",
+    kitchen: "https://images.unsplash.com/photo-1556911220-bff31c812dba",
     disaster: "https://images.unsplash.com/photo-1523413651479-597eb2da0ad6"
   };
 
   // =========================
-  // AI-STYLE EZ FAST ENGINE
+  // EZ-FAST AI RESPONSE ENGINE
   // =========================
   const aiResponse = (chaos) => {
     const responses = [
-      "Technician stabilizes system instantly.",
-      "Advanced diagnosis prevents escalation.",
-      "Emergency bypass installed successfully.",
-      "Full system restoration completed.",
-      "Critical leak isolated and repaired."
+      "EZ-FAST stabilizes the system instantly.",
+      "Technician isolates the failure point before escalation.",
+      "Emergency bypass prevents further flooding.",
+      "Full restoration completed with no secondary damage.",
+      "Advanced diagnostics prevent a major failure."
     ];
-
-    return responses[Math.min(Math.floor(chaos / 20), responses.length - 1)];
+    return responses[Math.min(Math.floor(chaos / 25), responses.length - 1)];
   };
 
   // =========================
@@ -64,22 +64,22 @@ export default function OhCrapGame() {
   // =========================
   const events = [
     "A pipe vibrates ominously...",
-    "You hear water behind the walls...",
-    "Your dog refuses to enter the bathroom.",
-    "The floor feels slightly warmer...",
-    "Something is dripping… somewhere.",
+    "Water sounds echo behind the walls...",
+    "Your dog refuses to enter the room.",
+    "Something is dripping... but unseen.",
+    "Pressure in the system is changing.",
   ];
 
   // =========================
-  // STORY NODES V3
+  // STORY ENGINE
   // =========================
   const story = {
     start: {
       title: "OH CRAP! — Toilet Overflow",
-      text: "Water rises. Fast. Something is wrong.",
+      text: "Water rises fast. Something is wrong.",
       choices: [
         { text: "Call EZ-FAST Plumbing", next: "end_good", damage: -10, stress: -15, wallet: -250 },
-        { text: "Try to fix it yourself", next: "bathroom", damage: 15, stress: 20, wallet: 0 }
+        { text: "Try DIY plunging", next: "bathroom", damage: 15, stress: 20, wallet: 0 }
       ]
     },
 
@@ -94,7 +94,7 @@ export default function OhCrapGame() {
 
     disaster: {
       title: "SYSTEM FAILURE",
-      text: "Multiple drains are now backing up simultaneously.",
+      text: "Multiple drains are backing up simultaneously.",
       choices: [
         { text: "Call EZ-FAST Plumbing", next: "end_late", damage: 10, stress: 10, wallet: -800 },
         { text: "Open cleanout pipe", next: "end_bad", damage: 60, stress: 60, wallet: -2000 }
@@ -132,7 +132,7 @@ export default function OhCrapGame() {
   // RANDOM EVENT TRIGGER
   // =========================
   const triggerEvent = () => {
-    if (Math.random() < 0.3) {
+    if (Math.random() < 0.35) {
       setEvent(events[Math.floor(Math.random() * events.length)]);
     } else {
       setEvent('');
@@ -140,18 +140,25 @@ export default function OhCrapGame() {
   };
 
   // =========================
-  // HANDLE CHOICE V3
+  // CHOICE ENGINE
   // =========================
   const choose = (c) => {
     play('click');
     triggerEvent();
 
+    // MODE SYSTEM
+    if (c.damage >= 40) setMode('disaster');
+    else if (c.damage >= 20) setMode('warning');
+    else setMode('calm');
+
+    // SHAKE
     if (c.damage > 30) {
       setShake(true);
       play('disaster');
       setTimeout(() => setShake(false), 400);
     }
 
+    // STATE UPDATE
     setState(prev => ({
       damage: Math.max(0, prev.damage + c.damage),
       stress: Math.max(0, prev.stress + c.stress),
@@ -174,13 +181,14 @@ export default function OhCrapGame() {
   const reset = () => {
     setNode('start');
     setState({ damage: 0, stress: 0, wallet: 0, flood: 0, chaos: 0 });
-    setEnding('');
     setEvent('');
+    setEnding('');
+    setMode('calm');
   };
 
   return (
     <div
-      className={`min-h-screen text-white flex items-center justify-center p-6 transition-all duration-500 ${shake ? "animate-shake" : ""}`}
+      className={`min-h-screen flex items-center justify-center p-6 text-white transition-all duration-500 ${shake ? "animate-shake" : ""}`}
       style={{
         backgroundImage: `url(${backgrounds[node] || backgrounds.start})`,
         backgroundSize: "cover",
@@ -188,20 +196,24 @@ export default function OhCrapGame() {
       }}
     >
 
-      {/* dark overlay */}
+      {/* DARK OVERLAY */}
       <div className="absolute inset-0 bg-black/70"></div>
 
-      {/* flood effect */}
-      {state.flood > 30 && (
-        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-blue-500/20 animate-flood"></div>
+      {/* FLOOD EFFECT */}
+      {state.flood > 20 && (
+        <div
+          className="absolute bottom-0 left-0 w-full bg-blue-500/20 transition-all duration-700"
+          style={{ height: `${state.flood}%` }}
+        />
       )}
 
-      <div className="relative w-full max-w-3xl bg-slate-900/90 p-8 rounded-3xl border border-slate-700 backdrop-blur-lg">
+      <div className="relative w-full max-w-4xl bg-slate-900/90 backdrop-blur-xl p-8 rounded-3xl border border-slate-700 z-10">
 
         <h1 className="text-3xl font-bold text-red-400 mb-3">
           {current.title}
         </h1>
 
+        {/* EVENT */}
         {event && (
           <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-400 text-yellow-200 rounded-xl">
             ⚠ {event}
@@ -232,8 +244,9 @@ export default function OhCrapGame() {
             ))}
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="text-center text-lg text-green-300">
+          <div className="space-y-4 text-center">
+
+            <div className="text-green-300 text-lg font-semibold">
               {aiResponse(state.chaos)}
             </div>
 
@@ -244,8 +257,8 @@ export default function OhCrapGame() {
               Play Again
             </button>
 
-            <div className="text-xs text-slate-400 text-center">
-              Final Chaos Score: {state.chaos}
+            <div className="text-xs text-slate-400">
+              Chaos Score: {state.chaos}
             </div>
           </div>
         )}
