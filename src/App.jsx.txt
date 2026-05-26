@@ -1,0 +1,348 @@
+import React from 'react';
+
+export default function OhCrapGame() {
+
+  // =========================
+  // SOUND ENGINE
+  // =========================
+  const sound = {
+    click: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
+    disaster: 'https://assets.mixkit.co/active_storage/sfx/209/209-preview.mp3',
+    success: 'https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3',
+  };
+
+  const play = (type) => {
+    const audio = new Audio(sound[type]);
+    audio.volume = 0.35;
+    audio.play().catch(() => {});
+  };
+
+  // =========================
+  // AI GAME STATE ENGINE
+  // =========================
+  const [state, setState] = React.useState({
+    damage: 0,
+    stress: 0,
+    wallet: 0,
+    flood: 0,
+    chaos: 0,
+    riskProfile: 0 // 🔥 NEW: AI tracks player behavior
+  });
+
+  const [node, setNode] = React.useState('start');
+  const [event, setEvent] = React.useState('');
+  const [shake, setShake] = React.useState(false);
+  const [mode, setMode] = React.useState('calm');
+
+  // =========================
+  // AI DIRECTOR (CORE SYSTEM)
+  // =========================
+  const aiDirector = () => {
+    const chaos = state.chaos;
+
+    if (chaos > 180) return "catastrophe";
+    if (chaos > 120) return "critical";
+    if (chaos > 70) return "unstable";
+    return "stable";
+  };
+
+  const aiState = aiDirector();
+
+  // =========================
+  // VISUAL SYSTEM (AI DRIVEN)
+  // =========================
+  const visualMode = (() => {
+    if (aiState === "catastrophe") return "flood";
+    if (aiState === "critical") return "warning";
+    return "calm";
+  })();
+
+  // =========================
+  // RANDOM EVENTS (AI WEIGHTED)
+  // =========================
+  const events = {
+    stable: [
+      "A pipe hums quietly...",
+      "Normal water pressure detected.",
+      "Minor drip in the background."
+    ],
+    unstable: [
+      "Pressure spikes in the system...",
+      "You hear water moving behind walls...",
+      "Something just rattled inside the pipes..."
+    ],
+    critical: [
+      "Multiple drains are reacting at once...",
+      "The floor feels warm and wet...",
+      "Water pressure is violently unstable..."
+    ],
+    catastrophe: [
+      "SYSTEM FAILURE IMMINENT...",
+      "Water is now moving THROUGH walls...",
+      "Everything is actively flooding..."
+    ]
+  };
+
+  const triggerEvent = () => {
+    const pool = events[aiState];
+    if (Math.random() < 0.5) {
+      setEvent(pool[Math.floor(Math.random() * pool.length)]);
+    } else setEvent('');
+  };
+
+  // =========================
+  // AI STORY ENGINE (ADAPTIVE DIFFICULTY)
+  // =========================
+  const story = {
+    start: {
+      title: "OH CRAP! — Toilet Overflow",
+      text: "Water rises fast. The system is reacting unpredictably.",
+      choices: [
+        {
+          text: "Call EZ-FAST Plumbing",
+          next: "end_good",
+          damage: -10,
+          stress: -15,
+          wallet: -250
+        },
+        {
+          text: "Try DIY plunging",
+          next: "bathroom",
+          damage: 15,
+          stress: 20,
+          wallet: 0
+        }
+      ]
+    },
+
+    bathroom: {
+      title: "Bathroom Escalation",
+      text: "The AI detects pressure instability spreading.",
+      choices: [
+        {
+          text: "Call EZ-FAST Plumbing",
+          next: "end_rescue",
+          damage: -10,
+          stress: -15,
+          wallet: -400
+        },
+        {
+          text: "Push system harder (DIY)",
+          next: "disaster",
+          damage: 30 + state.riskProfile,
+          stress: 25 + state.riskProfile,
+          wallet: -120
+        }
+      ]
+    },
+
+    disaster: {
+      title: "AI DETECTED SYSTEM FAILURE",
+      text: "Multiple failure points are now active.",
+      choices: [
+        {
+          text: "Call EZ-FAST Plumbing (Emergency Mode)",
+          next: "end_late",
+          damage: 10,
+          stress: 10,
+          wallet: -800
+        },
+        {
+          text: "Force manual override",
+          next: "end_bad",
+          damage: 60 + state.riskProfile,
+          stress: 60 + state.riskProfile,
+          wallet: -2000
+        }
+      ]
+    },
+
+    // =========================
+    // ENDINGS
+    // =========================
+    end_good: {
+      ending: true,
+      title: "Professional Victory",
+      text: "EZ-FAST neutralizes the issue before escalation."
+    },
+
+    end_rescue: {
+      ending: true,
+      title: "Narrow Escape",
+      text: "AI predicts full failure—intervention prevents disaster."
+    },
+
+    end_late: {
+      ending: true,
+      title: "Expensive Lesson",
+      text: "System restored, but damage was partially irreversible."
+    },
+
+    end_bad: {
+      ending: true,
+      title: "TOTAL SYSTEM COLLAPSE",
+      text: "AI prediction confirmed: full structural failure."
+    }
+  };
+
+  const current = story[node];
+
+  // =========================
+  // AI DIRECTOR UPDATE (LEARNING LOOP)
+  // =========================
+  const updateRiskProfile = (choice) => {
+    let risk = state.riskProfile;
+
+    if (choice.damage > 25) risk += 2;
+    if (choice.text.toLowerCase().includes("diy")) risk += 3;
+    if (choice.text.toLowerCase().includes("call")) risk -= 1;
+
+    return Math.max(0, Math.min(20, risk));
+  };
+
+  // =========================
+  // CHOICE ENGINE (AI DRIVEN)
+  // =========================
+  const choose = (c) => {
+    play('click');
+
+    triggerEvent();
+
+    if (c.damage > 30) {
+      setShake(true);
+      play('disaster');
+      setTimeout(() => setShake(false), 400);
+    }
+
+    setMode(aiState);
+
+    setState(prev => ({
+      damage: Math.max(0, prev.damage + c.damage),
+      stress: Math.max(0, prev.stress + c.stress),
+      wallet: prev.wallet + c.wallet,
+      flood: Math.min(100, prev.flood + c.damage),
+      chaos: prev.chaos + c.damage + c.stress,
+      riskProfile: updateRiskProfile(c)
+    }));
+
+    setNode(c.next);
+  };
+
+  // =========================
+  // RESET
+  // =========================
+  const reset = () => {
+    setNode('start');
+    setState({
+      damage: 0,
+      stress: 0,
+      wallet: 0,
+      flood: 0,
+      chaos: 0,
+      riskProfile: 0
+    });
+    setEvent('');
+    setMode('calm');
+  };
+
+  // =========================
+  // VISUAL PANEL (AI DRIVEN ANIMATIONS)
+  // =========================
+  const VisualPanel = () => {
+    return (
+      <div className="w-full h-full flex items-center justify-center text-center">
+
+        {visualMode === 'calm' && (
+          <div className="text-blue-300 animate-pulse">
+            💧 Stable flow detected
+          </div>
+        )}
+
+        {visualMode === 'warning' && (
+          <div className="text-yellow-300 animate-bounce">
+            🚰 Pressure instability rising...
+          </div>
+        )}
+
+        {visualMode === 'flood' && (
+          <div className="text-red-400 animate-pulse font-bold">
+            🌊 SYSTEM COLLAPSE<br />
+            AI predicts failure imminent
+          </div>
+        )}
+
+      </div>
+    );
+  };
+
+  return (
+    <div className={`min-h-screen flex items-center justify-center p-6 bg-slate-950 text-white ${shake ? "animate-shake" : ""}`}>
+
+      <div className="w-full max-w-6xl grid md:grid-cols-2 gap-6">
+
+        {/* GAME PANEL */}
+        <div className="bg-slate-900 p-8 rounded-3xl border border-slate-700">
+
+          <h1 className="text-3xl font-bold text-red-400 mb-3">
+            {current.title}
+          </h1>
+
+          {event && (
+            <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-400 text-yellow-200 rounded-xl">
+              ⚠ {event}
+            </div>
+          )}
+
+          <p className="mb-6 text-slate-200 whitespace-pre-line">
+            {current.text}
+          </p>
+
+          {/* AI STATUS HUD */}
+          <div className="grid grid-cols-3 gap-2 text-xs text-slate-300 mb-6">
+            <div>Chaos: {state.chaos}</div>
+            <div>Risk AI: {state.riskProfile}</div>
+            <div>Mode: {aiState}</div>
+          </div>
+
+          {!current.ending ? (
+            <div className="space-y-3">
+              {current.choices.map((c, i) => (
+                <button
+                  key={i}
+                  onClick={() => choose(c)}
+                  className="w-full p-4 bg-slate-800 hover:bg-slate-700 rounded-xl"
+                >
+                  {c.text}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center space-y-4">
+
+              <div className="text-green-300 font-semibold">
+                AI simulation complete.
+              </div>
+
+              <button
+                onClick={reset}
+                className="w-full p-4 bg-red-600 rounded-xl"
+              >
+                Run Simulation Again
+              </button>
+
+              <div className="text-xs text-slate-400">
+                Final Chaos Index: {state.chaos}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* VISUAL PANEL */}
+        <div className="bg-slate-950 border border-slate-800 rounded-3xl p-8 flex items-center justify-center min-h-[300px]">
+          <VisualPanel />
+        </div>
+
+      </div>
+    </div>
+  );
+}
