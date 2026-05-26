@@ -13,9 +13,9 @@ export default function OhCrapGame() {
     audio.play().catch(() => {});
   };
 
-  // ===============================
-  // 1. WORLD STATE (UPGRADED)
-  // ===============================
+  // =========================
+  // WORLD STATE SYSTEM
+  // =========================
   const [state, setState] = React.useState({
     damage: 0,
     stress: 0,
@@ -31,8 +31,10 @@ export default function OhCrapGame() {
   const [event, setEvent] = React.useState('');
   const [shake, setShake] = React.useState(false);
   const [achievement, setAchievement] = React.useState('');
-  const [finalReport, setFinalReport] = React.useState('');
 
+  // =========================
+  // RANDOM EVENTS
+  // =========================
   const randomEvents = [
     "A neighbor gives unsolicited plumbing advice.",
     "Your spouse is now supervising you.",
@@ -42,139 +44,138 @@ export default function OhCrapGame() {
     "A YouTube plumber contradicts your plan."
   ];
 
-  // ===============================
-  // STORY NODES
-  // ===============================
+  // =========================
+  // STORY NODES (MULTI START)
+  // =========================
   const storyNodes = {
     start: {
-      title: "OH CRAP!",
+      title: "OH CRAP! — Toilet Backup",
       text: `
-It’s 9:14 PM.
-
 You flush the upstairs toilet.
 
 Nothing happens.
 
-Then it gets worse.
+Then everything happens.
       `,
       choices: [
-        {
-          text: "Call EZ-FAST Plumbing",
-          next: "goodEnding",
-          damage: -5,
-          stress: -10,
-          wallet: -250
-        },
-        {
-          text: "Try to fix it yourself",
-          next: "plungerAttempt",
-          damage: 10,
-          stress: 15,
-          wallet: 0
-        }
+        { text: "Call EZ-FAST Plumbing", next: "goodEnding", damage: -5, stress: -10, wallet: -250 },
+        { text: "Try DIY plunging", next: "plungerAttempt", damage: 10, stress: 15, wallet: 0 }
+      ]
+    },
+
+    kitchenStart: {
+      title: "OH CRAP! — Kitchen Disaster",
+      text: `
+The garbage disposal makes a horrifying noise.
+
+The sink fills up faster than it drains.
+      `,
+      choices: [
+        { text: "Call EZ-FAST Plumbing", next: "goodEnding", damage: -5, stress: -10, wallet: -250 },
+        { text: "Reach in carefully", next: "disposalDisaster", damage: 20, stress: 25, wallet: -50 }
+      ]
+    },
+
+    waterHeaterStart: {
+      title: "OH CRAP! — Water Heater Leak",
+      text: `
+You hear hissing from the garage.
+
+The water heater is leaking.
+
+It is not supposed to do that.
+      `,
+      choices: [
+        { text: "Call EZ-FAST Plumbing", next: "goodEnding", damage: -5, stress: -10, wallet: -300 },
+        { text: "Tap it lightly", next: "heaterExplosion", damage: 30, stress: 25, wallet: -100 }
       ]
     },
 
     plungerAttempt: {
       title: "The Plunger Incident",
-      text: `
-You plunge aggressively.
-
-The toilet responds emotionally.
-
-Poorly.
-      `,
+      text: `The toilet responds… aggressively.`,
       choices: [
-        {
-          text: "Call EZ-FAST Plumbing",
-          next: "rescuedEnding",
-          damage: -5,
-          stress: -10,
-          wallet: -350
-        },
-        {
-          text: "Rent a drain snake",
-          next: "snakeDisaster",
-          damage: 25,
-          stress: 20,
-          wallet: -89
-        }
+        { text: "Call EZ-FAST Plumbing", next: "rescuedEnding", damage: -5, stress: -10, wallet: -350 },
+        { text: "Rent a drain snake", next: "snakeDisaster", damage: 25, stress: 20, wallet: -89 }
       ]
     },
 
     snakeDisaster: {
       title: "Critical Failure",
-      text: `
-The snake gets stuck in the pipe.
-
-You panic.
-
-The house starts making new sounds.
-      `,
+      text: `The snake gets stuck. Something cracks.`,
       choices: [
-        {
-          text: "Call EZ-FAST Plumbing",
-          next: "lateRescueEnding",
-          damage: 10,
-          stress: 10,
-          wallet: -650
-        },
-        {
-          text: "Push harder anyway",
-          next: "catastropheEnding",
-          damage: 50,
-          stress: 40,
-          wallet: -1200
-        }
+        { text: "Call EZ-FAST Plumbing", next: "lateRescueEnding", damage: 10, stress: 10, wallet: -650 },
+        { text: "Push harder", next: "catastropheEnding", damage: 50, stress: 40, wallet: -1200 }
       ]
     },
 
+    disposalDisaster: {
+      title: "Kitchen Escalation",
+      text: `Everything starts backing up into everything else.`,
+      choices: [
+        { text: "Call EZ-FAST Plumbing", next: "rescuedEnding", damage: 5, stress: 5, wallet: -300 },
+        { text: "Keep DIY-ing", next: "catastropheEnding", damage: 40, stress: 30, wallet: -900 }
+      ]
+    },
+
+    heaterExplosion: {
+      title: "Water Heater Regret",
+      text: `The leak becomes… more confident.`,
+      choices: [
+        { text: "Call EZ-FAST Plumbing", next: "lateRescueEnding", damage: 15, stress: 15, wallet: -800 }
+      ]
+    },
+
+    // =========================
+    // ENDINGS
+    // =========================
     goodEnding: {
       ending: true,
       title: "Professional Victory",
-      text: "EZ-FAST fixes everything quickly. Nothing else breaks."
+      text: "Everything is fixed quickly and correctly."
     },
 
     rescuedEnding: {
       ending: true,
       title: "Narrow Escape",
-      text: "You avoided a full plumbing disaster."
+      text: "You avoided major damage."
     },
 
     lateRescueEnding: {
       ending: true,
-      title: "Expensive Lesson"
+      title: "Expensive Lesson",
+      text: "Repairs worked, but the bill hurt."
     },
 
     catastropheEnding: {
       ending: true,
-      title: "TOTAL CATASTROPHE"
+      title: "TOTAL CATASTROPHE",
+      text: "Everything went wrong. Completely."
     }
   };
 
   const node = storyNodes[currentNode];
 
-  // ===============================
-  // 2. WORLD STATE ENGINE (DOG + FAMILY + CHAOS)
-  // ===============================
+  const startNodes = ['start', 'kitchenStart', 'waterHeaterStart'];
+
+  // =========================
+  // HANDLE CHOICE (WORLD ENGINE)
+  // =========================
   const handleChoice = (choice) => {
     playSound('click');
 
-    // random event system
     if (Math.random() < 0.35) {
       setEvent(randomEvents[Math.floor(Math.random() * randomEvents.length)]);
     } else {
       setEvent('');
     }
 
-    // shake on big damage
     if (choice.damage >= 25) {
       setShake(true);
       playSound('disaster');
       setTimeout(() => setShake(false), 500);
     }
 
-    // WORLD STATE UPDATE (CORE UPGRADE)
     setState(prev => ({
       damage: Math.max(0, prev.damage + choice.damage),
       stress: Math.max(0, prev.stress + choice.stress),
@@ -187,45 +188,22 @@ The house starts making new sounds.
       chaosLevel: prev.chaosLevel + choice.damage + choice.stress
     }));
 
-    if (choice.next === 'catastropheEnding') {
-      setAchievement('MASTER OF BAD DECISIONS');
-      generateFinalReport("catastropheEnding");
-    }
-
-    if (choice.next === 'goodEnding') {
-      setAchievement('RESPONSIBLE HOMEOWNER');
-      generateFinalReport("goodEnding");
-    }
-
     setCurrentNode(choice.next);
+
+    if (choice.next === 'catastropheEnding') {
+      setAchievement("MASTER OF BAD DECISIONS");
+    }
   };
 
-  // ===============================
-  // 3. FINAL REPORT (INSURANCE STYLE)
-  // ===============================
-  const generateFinalReport = (endingType) => {
-    setFinalReport(`
-INSURANCE + HOME DAMAGE REPORT
-
-Physical Damage: ${state.damage}%
-Emotional Stress: ${state.stress}%
-Financial Loss: $${Math.abs(state.wallet)}
-
-Dog Mood: ${state.dogMood}/100
-Spouse Trust: ${state.spouseTrust}/100
-Insurance Risk Score: ${state.insuranceRisk}
-Chaos Index: ${state.chaosLevel}
-
-Outcome: ${endingType.toUpperCase()}
-
-Recommendation:
-Do not attempt further DIY plumbing.
-Call a licensed professional immediately.
-    `);
-  };
-
+  // =========================
+  // RESTART (RANDOM START FIX)
+  // =========================
   const restartGame = () => {
-    setCurrentNode('start');
+    const randomStart =
+      startNodes[Math.floor(Math.random() * startNodes.length)];
+
+    setCurrentNode(randomStart);
+
     setState({
       damage: 0,
       stress: 0,
@@ -236,9 +214,9 @@ Call a licensed professional immediately.
       insuranceRisk: 10,
       chaosLevel: 0
     });
+
     setEvent('');
     setAchievement('');
-    setFinalReport('');
   };
 
   return (
@@ -256,7 +234,7 @@ Call a licensed professional immediately.
           </div>
         )}
 
-        <p className="whitespace-pre-line mb-6 text-slate-200">
+        <p className="whitespace-pre-line mb-6">
           {node.text}
         </p>
 
@@ -289,11 +267,9 @@ Call a licensed professional immediately.
               Play Again
             </button>
 
-            {finalReport && (
-              <pre className="text-xs bg-black/40 p-4 rounded-xl whitespace-pre-wrap">
-                {finalReport}
-              </pre>
-            )}
+            <div className="text-sm text-slate-300 bg-black/40 p-4 rounded-xl">
+              Chaos Score: {state.chaosLevel}
+            </div>
           </div>
         )}
 
