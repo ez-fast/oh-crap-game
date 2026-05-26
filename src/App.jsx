@@ -3,13 +3,12 @@ import React from 'react';
 export default function OhCrapGame() {
 
   // =========================
-  // SOUND ENGINE V3.1
+  // SOUND ENGINE
   // =========================
   const sound = {
     click: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
     disaster: 'https://assets.mixkit.co/active_storage/sfx/209/209-preview.mp3',
     success: 'https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3',
-    drip: 'https://assets.mixkit.co/active_storage/sfx/3005/3005-preview.mp3'
   };
 
   const play = (type) => {
@@ -19,7 +18,7 @@ export default function OhCrapGame() {
   };
 
   // =========================
-  // WORLD STATE
+  // STATE
   // =========================
   const [state, setState] = React.useState({
     damage: 0,
@@ -32,37 +31,18 @@ export default function OhCrapGame() {
   const [node, setNode] = React.useState('start');
   const [event, setEvent] = React.useState('');
   const [shake, setShake] = React.useState(false);
-  const [ending, setEnding] = React.useState('');
   const [mode, setMode] = React.useState('calm');
 
   // =========================
-  // VISUAL ENGINE (NEW)
+  // VISUAL STATE ENGINE (NEW)
   // =========================
-  const visual = {
-    water: state.flood,
-    mode
+  const getVisualMode = () => {
+    if (state.flood > 60 || mode === 'disaster') return 'flood';
+    if (state.flood > 30 || mode === 'warning') return 'warning';
+    return 'calm';
   };
 
-  // =========================
-  // BACKGROUNDS (kept minimal, not dominant anymore)
-  // =========================
-  const backgrounds = {
-    start: "linear-gradient(135deg, #0f172a, #020617)",
-  };
-
-  // =========================
-  // EZ-FAST AI RESPONSE ENGINE
-  // =========================
-  const aiResponse = (chaos) => {
-    const responses = [
-      "EZ-FAST stabilizes the system instantly.",
-      "Technician isolates failure before escalation.",
-      "Emergency bypass prevents flooding.",
-      "Full restoration completed safely.",
-      "Advanced diagnostics prevent disaster."
-    ];
-    return responses[Math.min(Math.floor(chaos / 25), responses.length - 1)];
-  };
+  const visualMode = getVisualMode();
 
   // =========================
   // RANDOM EVENTS
@@ -76,7 +56,7 @@ export default function OhCrapGame() {
   ];
 
   // =========================
-  // STORY ENGINE
+  // STORY
   // =========================
   const story = {
     start: {
@@ -106,23 +86,40 @@ export default function OhCrapGame() {
       ]
     },
 
-    end_good: { ending: true, title: "Professional Victory", text: "Everything is fixed quickly." },
-    end_rescue: { ending: true, title: "Narrow Escape", text: "You avoided major damage." },
-    end_late: { ending: true, title: "Expensive Lesson", text: "It got fixed… but at a cost." },
-    end_bad: { ending: true, title: "TOTAL DISASTER", text: "The house will never be the same." }
+    end_good: {
+      ending: true,
+      title: "Professional Victory",
+      text: "Everything is fixed cleanly and quickly."
+    },
+
+    end_rescue: {
+      ending: true,
+      title: "Narrow Escape",
+      text: "You avoided major damage."
+    },
+
+    end_late: {
+      ending: true,
+      title: "Expensive Lesson",
+      text: "It got fixed… but at a cost."
+    },
+
+    end_bad: {
+      ending: true,
+      title: "TOTAL DISASTER",
+      text: "The house will never be the same."
+    }
   };
 
   const current = story[node];
 
   // =========================
-  // RANDOM EVENTS
+  // EVENTS
   // =========================
   const triggerEvent = () => {
-    if (Math.random() < 0.35) {
+    if (Math.random() < 0.3) {
       setEvent(events[Math.floor(Math.random() * events.length)]);
-    } else {
-      setEvent('');
-    }
+    } else setEvent('');
   };
 
   // =========================
@@ -132,19 +129,16 @@ export default function OhCrapGame() {
     play('click');
     triggerEvent();
 
-    // MODE SYSTEM
-    if (c.damage >= 40) setMode('disaster');
-    else if (c.damage >= 20) setMode('warning');
-    else setMode('calm');
-
-    // SHAKE
     if (c.damage > 30) {
       setShake(true);
       play('disaster');
       setTimeout(() => setShake(false), 400);
     }
 
-    // STATE UPDATE
+    if (c.damage >= 40) setMode('disaster');
+    else if (c.damage >= 20) setMode('warning');
+    else setMode('calm');
+
     setState(prev => ({
       damage: Math.max(0, prev.damage + c.damage),
       stress: Math.max(0, prev.stress + c.stress),
@@ -152,11 +146,6 @@ export default function OhCrapGame() {
       flood: Math.min(100, prev.flood + c.damage),
       chaos: prev.chaos + c.damage + c.stress
     }));
-
-    if (c.next.includes("end")) {
-      play('success');
-      setEnding(c.next);
-    }
 
     setNode(c.next);
   };
@@ -168,30 +157,49 @@ export default function OhCrapGame() {
     setNode('start');
     setState({ damage: 0, stress: 0, wallet: 0, flood: 0, chaos: 0 });
     setEvent('');
-    setEnding('');
     setMode('calm');
   };
 
   // =========================
-  // VISUAL COLORS
+  // VISUAL PANEL (NEW ANIMATIONS)
   // =========================
-  const modeColor =
-    mode === 'calm'
-      ? 'bg-slate-900'
-      : mode === 'warning'
-      ? 'bg-yellow-500/10'
-      : 'bg-red-500/10';
+  const VisualPanel = () => {
+    return (
+      <div className="w-full h-full flex items-center justify-center relative">
+
+        {/* CALM */}
+        {visualMode === 'calm' && (
+          <div className="text-blue-300 animate-pulse text-center">
+            💧 Subtle plumbing hum...
+          </div>
+        )}
+
+        {/* WARNING */}
+        {visualMode === 'warning' && (
+          <div className="text-yellow-300 animate-bounce text-center">
+            🚰 Pipes under pressure...
+          </div>
+        )}
+
+        {/* FLOOD */}
+        {visualMode === 'flood' && (
+          <div className="text-red-400 animate-pulse text-center">
+            🌊 SYSTEM FAILURE<br />
+            Water rising...
+          </div>
+        )}
+
+      </div>
+    );
+  };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-6 text-white ${shake ? "animate-shake" : ""}`}>
+    <div className={`min-h-screen flex items-center justify-center p-6 bg-slate-950 text-white ${shake ? "animate-shake" : ""}`}>
 
-      {/* MAIN GRID */}
-      <div className="w-full max-w-6xl grid md:grid-cols-2 gap-6">
+      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        {/* =========================
-            STORY PANEL
-        ========================= */}
-        <div className={`p-8 rounded-3xl border border-slate-700 ${modeColor}`}>
+        {/* LEFT GAME PANEL */}
+        <div className="bg-slate-900 p-8 rounded-3xl border border-slate-700">
 
           <h1 className="text-3xl font-bold text-red-400 mb-3">
             {current.title}
@@ -219,17 +227,16 @@ export default function OhCrapGame() {
                 <button
                   key={i}
                   onClick={() => choose(c)}
-                  className="w-full p-4 bg-slate-800/80 hover:bg-slate-700 rounded-xl transition"
+                  className="w-full p-4 bg-slate-800 hover:bg-slate-700 rounded-xl"
                 >
                   {c.text}
                 </button>
               ))}
             </div>
           ) : (
-            <div className="space-y-4 text-center">
-
-              <div className="text-green-300 text-lg font-semibold">
-                {aiResponse(state.chaos)}
+            <div className="text-center space-y-4">
+              <div className="text-green-300 font-semibold">
+                EZ-FAST restores order.
               </div>
 
               <button
@@ -244,45 +251,11 @@ export default function OhCrapGame() {
               </div>
             </div>
           )}
-
         </div>
 
-        {/* =========================
-            ANIMATION PANEL (NEW)
-        ========================= */}
-        <div className="relative bg-black rounded-3xl overflow-hidden border border-slate-700">
-
-          {/* WATER LEVEL */}
-          <div
-            className="absolute bottom-0 left-0 w-full bg-blue-500/30 transition-all duration-700"
-            style={{ height: `${visual.water}%` }}
-          />
-
-          {/* MODE OVERLAY */}
-          <div className={`absolute inset-0 transition-all duration-500
-            ${visual.mode === 'calm' ? '' : ''}
-            ${visual.mode === 'warning' ? 'bg-yellow-500/10 animate-pulse' : ''}
-            ${visual.mode === 'disaster' ? 'bg-red-500/20 animate-pulse' : ''}
-          `} />
-
-          {/* CENTER CORE VISUAL */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className={`
-              w-44 h-44 border-4 border-slate-500 rounded-full flex items-center justify-center text-xs text-slate-300 text-center
-              transition-all duration-300
-              ${visual.mode === 'disaster' ? 'animate-pulse scale-110 border-red-400' : ''}
-              ${visual.mode === 'warning' ? 'scale-105 border-yellow-400' : ''}
-            `}>
-              PLUMBING SYSTEM<br />
-              MODE: {visual.mode.toUpperCase()}
-            </div>
-          </div>
-
-          {/* STATUS */}
-          <div className="absolute bottom-4 left-0 w-full text-center text-xs text-slate-400">
-            Water Level: {Math.round(visual.water)}%
-          </div>
-
+        {/* RIGHT VISUAL PANEL */}
+        <div className="bg-slate-950 border border-slate-800 rounded-3xl p-8 flex items-center justify-center min-h-[300px]">
+          <VisualPanel />
         </div>
 
       </div>
