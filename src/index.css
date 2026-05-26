@@ -3,18 +3,23 @@
 @tailwind utilities;
 
 @keyframes shake {
-  0% { transform: translate(0, 0); }
-  10% { transform: translate(-8px, 0); }
-  20% { transform: translate(8px, 0); }
-  30% { transform: translate(-8px, 0); }
-  40% { transform: translate(8px, 0); }
-  50% { transform: translate(-5px, 0); }
-  60% { transform: translate(5px, 0); }
-  70% { transform: translate(-3px, 0); }
-  80% { transform: translate(3px, 0); }
-  100% { transform: translate(0, 0); }
+  0% { transform: translate(0px, 0px); }
+  25% { transform: translate(6px, -4px); }
+  50% { transform: translate(-6px, 4px); }
+  75% { transform: translate(6px, 4px); }
+  100% { transform: translate(0px, 0px); }
 }
 
 .animate-shake {
-  animation: shake 0.5s ease-in-out;
+  animation: shake 0.35s ease-in-out;
+}
+
+/* subtle water overlay animation */
+@keyframes flood {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 0.35; transform: translateY(0px); }
+}
+
+.animate-flood {
+  animation: flood 1s ease-in-out;
 }
