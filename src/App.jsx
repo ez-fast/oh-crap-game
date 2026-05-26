@@ -45,7 +45,40 @@ export default function OhCrapGame() {
   ];
 
   // =========================
-  // STORY NODES (MULTI START)
+  // EZ-FAST RESCUE ENGINE (NEW)
+  // =========================
+  const generateRescueOutcome = () => {
+    const outcomes = [
+      {
+        text: "EZ-FAST dispatch arrives within 40 minutes and quickly stabilizes the system with no additional damage.",
+        stress: -15,
+        bonus: 0
+      },
+      {
+        text: "A senior technician identifies the issue early and prevents what could have become a major failure.",
+        stress: -20,
+        bonus: 75
+      },
+      {
+        text: "Emergency service arrives promptly. The blockage is cleared and the system is fully restored.",
+        stress: -12,
+        bonus: 0
+      },
+      {
+        text: "Technician explains the root cause and performs a preventive fix that saves you future repairs.",
+        stress: -18,
+        bonus: 50
+      }
+    ];
+
+    return outcomes[Math.floor(Math.random() * outcomes.length)];
+  };
+
+  const isCallEzFast = (text) =>
+    text.toLowerCase().includes("call ez-fast");
+
+  // =========================
+  // STORY NODES
   // =========================
   const storyNodes = {
     start: {
@@ -155,11 +188,10 @@ It is not supposed to do that.
   };
 
   const node = storyNodes[currentNode];
-
   const startNodes = ['start', 'kitchenStart', 'waterHeaterStart'];
 
   // =========================
-  // HANDLE CHOICE (WORLD ENGINE)
+  // HANDLE CHOICE (UPDATED)
   // =========================
   const handleChoice = (choice) => {
     playSound('click');
@@ -176,12 +208,38 @@ It is not supposed to do that.
       setTimeout(() => setShake(false), 500);
     }
 
+    // =========================
+    // EZ-FAST CALL ENHANCED LOGIC
+    // =========================
+    if (isCallEzFast(choice.text)) {
+      const result = generateRescueOutcome();
+
+      setEvent(`🚨 EZ-FAST Dispatch: ${result.text}`);
+
+      setState(prev => ({
+        ...prev,
+        stress: Math.max(0, prev.stress + result.stress),
+        wallet: prev.wallet + choice.wallet + result.bonus,
+        damage: Math.max(0, prev.damage - 10),
+        insuranceRisk: Math.max(0, prev.insuranceRisk - 5),
+        chaosLevel: prev.chaosLevel + 2
+      }));
+
+      setTimeout(() => {
+        setCurrentNode(choice.next);
+      }, 1200);
+
+      return;
+    }
+
+    // =========================
+    // NORMAL PATH
+    // =========================
     setState(prev => ({
       damage: Math.max(0, prev.damage + choice.damage),
       stress: Math.max(0, prev.stress + choice.stress),
       wallet: prev.wallet + choice.wallet,
       flood: Math.min(100, prev.flood + choice.damage),
-
       dogMood: Math.max(0, prev.dogMood - choice.damage * 0.4),
       spouseTrust: Math.max(0, prev.spouseTrust - choice.stress * 0.5),
       insuranceRisk: prev.insuranceRisk + choice.damage * 0.6,
@@ -196,7 +254,7 @@ It is not supposed to do that.
   };
 
   // =========================
-  // RESTART (RANDOM START FIX)
+  // RESTART
   // =========================
   const restartGame = () => {
     const randomStart =
@@ -221,7 +279,6 @@ It is not supposed to do that.
 
   return (
     <div className={`min-h-screen bg-slate-950 text-white p-6 flex items-center justify-center ${shake ? "animate-pulse" : ""}`}>
-
       <div className="w-full max-w-4xl bg-slate-900 p-8 rounded-3xl border border-slate-700">
 
         <h1 className="text-4xl font-bold text-red-400 mb-4">
@@ -238,7 +295,6 @@ It is not supposed to do that.
           {node.text}
         </p>
 
-        {/* WORLD STATE HUD */}
         <div className="grid grid-cols-2 gap-2 text-sm text-slate-300 mb-6">
           <div>Damage: {state.damage}</div>
           <div>Stress: {state.stress}</div>
@@ -272,7 +328,6 @@ It is not supposed to do that.
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
