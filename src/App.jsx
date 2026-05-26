@@ -13,6 +13,26 @@ export default function OhCrapGame() {
     audio.play().catch(() => {});
   };
 
+  // ===============================
+  // 1. WORLD STATE (UPGRADED)
+  // ===============================
+  const [state, setState] = React.useState({
+    damage: 0,
+    stress: 0,
+    wallet: 0,
+    flood: 0,
+    dogMood: 70,
+    spouseTrust: 80,
+    insuranceRisk: 10,
+    chaosLevel: 0
+  });
+
+  const [currentNode, setCurrentNode] = React.useState('start');
+  const [event, setEvent] = React.useState('');
+  const [shake, setShake] = React.useState(false);
+  const [achievement, setAchievement] = React.useState('');
+  const [finalReport, setFinalReport] = React.useState('');
+
   const randomEvents = [
     "A neighbor gives unsolicited plumbing advice.",
     "Your spouse is now supervising you.",
@@ -22,9 +42,12 @@ export default function OhCrapGame() {
     "A YouTube plumber contradicts your plan."
   ];
 
+  // ===============================
+  // STORY NODES
+  // ===============================
   const storyNodes = {
     start: {
-      title: 'OH CRAP!',
+      title: "OH CRAP!",
       text: `
 It’s 9:14 PM.
 
@@ -32,23 +55,19 @@ You flush the upstairs toilet.
 
 Nothing happens.
 
-The water rises ominously.
-
-Your kids are yelling downstairs.
-
-The dog is barking at the bathroom door.
+Then it gets worse.
       `,
       choices: [
         {
-          text: 'Call EZ-FAST Plumbing',
-          next: 'goodEnding',
+          text: "Call EZ-FAST Plumbing",
+          next: "goodEnding",
           damage: -5,
           stress: -10,
           wallet: -250
         },
         {
-          text: 'Try to fix it yourself',
-          next: 'plungerAttempt',
+          text: "Try to fix it yourself",
+          next: "plungerAttempt",
           damage: 10,
           stress: 15,
           wallet: 0
@@ -56,51 +75,26 @@ The dog is barking at the bathroom door.
       ]
     },
 
-    kitchenStart: {
-      title: 'OH CRAP! — Garbage Disposal Disaster',
-      text: `
-You hear a loud metallic crunch from the kitchen sink.
-
-The garbage disposal begins humming ominously.
-
-Water backs up into the sink.
-      `,
-      choices: [
-        {
-          text: 'Call EZ-FAST Plumbing',
-          next: 'goodEnding',
-          damage: -5,
-          stress: -10,
-          wallet: -250
-        },
-        {
-          text: 'Stick your hand inside',
-          next: 'disposalDisaster',
-          damage: 20,
-          stress: 25,
-          wallet: -40
-        }
-      ]
-    },
-
     plungerAttempt: {
-      title: 'The Plunger Incident',
+      title: "The Plunger Incident",
       text: `
-The toilet erupts like a geyser.
+You plunge aggressively.
 
-You hear bubbling from the shower drain.
+The toilet responds emotionally.
+
+Poorly.
       `,
       choices: [
         {
-          text: 'Call EZ-FAST Plumbing',
-          next: 'rescuedEnding',
+          text: "Call EZ-FAST Plumbing",
+          next: "rescuedEnding",
           damage: -5,
           stress: -10,
           wallet: -350
         },
         {
-          text: 'Rent a drain snake',
-          next: 'snakeDisaster',
+          text: "Rent a drain snake",
+          next: "snakeDisaster",
           damage: 25,
           stress: 20,
           wallet: -89
@@ -109,23 +103,25 @@ You hear bubbling from the shower drain.
     },
 
     snakeDisaster: {
-      title: 'Critical Error',
+      title: "Critical Failure",
       text: `
-The snake gets stuck.
+The snake gets stuck in the pipe.
 
-Something cracks in the wall.
+You panic.
+
+The house starts making new sounds.
       `,
       choices: [
         {
-          text: 'Call EZ-FAST Plumbing',
-          next: 'lateRescueEnding',
+          text: "Call EZ-FAST Plumbing",
+          next: "lateRescueEnding",
           damage: 10,
           stress: 10,
           wallet: -650
         },
         {
-          text: 'Keep pushing anyway',
-          next: 'catastropheEnding',
+          text: "Push harder anyway",
+          next: "catastropheEnding",
           damage: 50,
           stress: 40,
           wallet: -1200
@@ -133,216 +129,175 @@ Something cracks in the wall.
       ]
     },
 
-    disposalDisaster: {
-      title: 'The Disposal Revolts',
-      text: `
-Black sludge erupts upward.
-
-The sink leaks into the cabinet.
-      `,
-      choices: [
-        {
-          text: 'Call EZ-FAST Plumbing',
-          next: 'rescuedEnding',
-          damage: 5,
-          stress: 5,
-          wallet: -300
-        },
-        {
-          text: 'Watch more DIY videos',
-          next: 'catastropheEnding',
-          damage: 40,
-          stress: 30,
-          wallet: -900
-        }
-      ]
-    },
-
-    multiDrainDisaster: {
-      title: 'Cross-Contamination Event',
-      text: `
-Multiple drains begin backing up at once.
-
-The house is now confused.
-      `,
-      choices: [
-        {
-          text: 'Call EZ-FAST Plumbing',
-          next: 'lateRescueEnding',
-          damage: 10,
-          stress: 10,
-          wallet: -600
-        },
-        {
-          text: 'Open the main line',
-          next: 'mainLineExplosion',
-          damage: 40,
-          stress: 35,
-          wallet: -120
-        }
-      ]
-    },
-
-    mainLineExplosion: {
-      title: 'MAIN LINE FAILURE',
-      text: `
-Everything floods.
-
-Everything.
-      `,
-      choices: [
-        {
-          text: 'Call EZ-FAST Plumbing',
-          next: 'catastropheEnding',
-          damage: 15,
-          stress: 15,
-          wallet: -900
-        },
-        {
-          text: 'Accept defeat',
-          next: 'catastropheEnding',
-          damage: 50,
-          stress: 50,
-          wallet: -2000
-        }
-      ]
-    },
-
     goodEnding: {
       ending: true,
-      title: 'Professional Victory',
-      text: `Everything is fixed quickly.`
+      title: "Professional Victory",
+      text: "EZ-FAST fixes everything quickly. Nothing else breaks."
     },
 
     rescuedEnding: {
       ending: true,
-      title: 'Narrow Escape',
-      text: `You avoided disaster.`
+      title: "Narrow Escape",
+      text: "You avoided a full plumbing disaster."
     },
 
     lateRescueEnding: {
       ending: true,
-      title: 'Expensive Lesson',
-      text: `Repairs were costly but successful.`
+      title: "Expensive Lesson"
     },
 
     catastropheEnding: {
       ending: true,
-      title: 'TOTAL PLUMBING CATASTROPHE',
-      text: `Everything went wrong.`
+      title: "TOTAL CATASTROPHE"
     }
   };
 
-  const [currentNode, setCurrentNode] = React.useState('start');
-  const [damage, setDamage] = React.useState(0);
-  const [stress, setStress] = React.useState(0);
-  const [wallet, setWallet] = React.useState(0);
-  const [floodLevel, setFloodLevel] = React.useState(0);
-  const [achievement, setAchievement] = React.useState('');
-  const [shake, setShake] = React.useState(false);
-  const [event, setEvent] = React.useState('');
-
   const node = storyNodes[currentNode];
 
+  // ===============================
+  // 2. WORLD STATE ENGINE (DOG + FAMILY + CHAOS)
+  // ===============================
   const handleChoice = (choice) => {
     playSound('click');
 
+    // random event system
     if (Math.random() < 0.35) {
       setEvent(randomEvents[Math.floor(Math.random() * randomEvents.length)]);
     } else {
       setEvent('');
     }
 
+    // shake on big damage
     if (choice.damage >= 25) {
       setShake(true);
       playSound('disaster');
       setTimeout(() => setShake(false), 500);
     }
 
-    if (choice.next.includes('Ending') && choice.damage < 15) {
-      playSound('success');
-    }
+    // WORLD STATE UPDATE (CORE UPGRADE)
+    setState(prev => ({
+      damage: Math.max(0, prev.damage + choice.damage),
+      stress: Math.max(0, prev.stress + choice.stress),
+      wallet: prev.wallet + choice.wallet,
+      flood: Math.min(100, prev.flood + choice.damage),
 
-    setDamage((p) => Math.max(0, p + choice.damage));
-    setStress((p) => Math.max(0, p + choice.stress));
-    setWallet((p) => p + choice.wallet);
-    setFloodLevel((p) => Math.min(100, p + choice.damage));
+      dogMood: Math.max(0, prev.dogMood - choice.damage * 0.4),
+      spouseTrust: Math.max(0, prev.spouseTrust - choice.stress * 0.5),
+      insuranceRisk: prev.insuranceRisk + choice.damage * 0.6,
+      chaosLevel: prev.chaosLevel + choice.damage + choice.stress
+    }));
 
     if (choice.next === 'catastropheEnding') {
       setAchievement('MASTER OF BAD DECISIONS');
+      generateFinalReport("catastropheEnding");
     }
 
     if (choice.next === 'goodEnding') {
       setAchievement('RESPONSIBLE HOMEOWNER');
+      generateFinalReport("goodEnding");
     }
 
     setCurrentNode(choice.next);
   };
 
-  const restartGame = () => {
-    setCurrentNode('start');
-    setDamage(0);
-    setStress(0);
-    setWallet(0);
-    setFloodLevel(0);
-    setAchievement('');
-    setEvent('');
+  // ===============================
+  // 3. FINAL REPORT (INSURANCE STYLE)
+  // ===============================
+  const generateFinalReport = (endingType) => {
+    setFinalReport(`
+INSURANCE + HOME DAMAGE REPORT
+
+Physical Damage: ${state.damage}%
+Emotional Stress: ${state.stress}%
+Financial Loss: $${Math.abs(state.wallet)}
+
+Dog Mood: ${state.dogMood}/100
+Spouse Trust: ${state.spouseTrust}/100
+Insurance Risk Score: ${state.insuranceRisk}
+Chaos Index: ${state.chaosLevel}
+
+Outcome: ${endingType.toUpperCase()}
+
+Recommendation:
+Do not attempt further DIY plumbing.
+Call a licensed professional immediately.
+    `);
   };
 
-  const meterClass = (value) => {
-    if (value < 25) return 'bg-green-500';
-    if (value < 60) return 'bg-yellow-500';
-    return 'bg-red-500';
+  const restartGame = () => {
+    setCurrentNode('start');
+    setState({
+      damage: 0,
+      stress: 0,
+      wallet: 0,
+      flood: 0,
+      dogMood: 70,
+      spouseTrust: 80,
+      insuranceRisk: 10,
+      chaosLevel: 0
+    });
+    setEvent('');
+    setAchievement('');
+    setFinalReport('');
   };
 
   return (
-    <>
-      <div
-        className="fixed bottom-0 left-0 w-full bg-blue-500/40 pointer-events-none transition-all duration-700 z-0"
-        style={{ height: `${floodLevel}%` }}
-      ></div>
+    <div className={`min-h-screen bg-slate-950 text-white p-6 flex items-center justify-center ${shake ? "animate-pulse" : ""}`}>
 
-      <div className={`min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white p-6 flex items-center justify-center ${shake ? "animate-pulse" : ""}`}>
+      <div className="w-full max-w-4xl bg-slate-900 p-8 rounded-3xl border border-slate-700">
 
-        <div className="w-full max-w-4xl bg-slate-900 rounded-3xl p-8 border border-slate-700">
+        <h1 className="text-4xl font-bold text-red-400 mb-4">
+          {node.title}
+        </h1>
 
-          <h1 className="text-5xl font-bold text-red-400 text-center mb-4">
-            {node.title}
-          </h1>
+        {event && (
+          <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-400 text-yellow-200 rounded-xl">
+            ⚠ {event}
+          </div>
+        )}
 
-          {event && (
-            <div className="bg-yellow-500/10 border border-yellow-400 text-yellow-200 p-3 rounded-xl mb-4 text-sm">
-              ⚠ {event}
-            </div>
-          )}
+        <p className="whitespace-pre-line mb-6 text-slate-200">
+          {node.text}
+        </p>
 
-          <p className="whitespace-pre-line mb-6">
-            {node.text}
-          </p>
+        {/* WORLD STATE HUD */}
+        <div className="grid grid-cols-2 gap-2 text-sm text-slate-300 mb-6">
+          <div>Damage: {state.damage}</div>
+          <div>Stress: {state.stress}</div>
+          <div>Dog Mood: {state.dogMood}</div>
+          <div>Spouse Trust: {state.spouseTrust}</div>
+        </div>
 
-          {!node.ending ? (
-            <div className="space-y-3">
-              {node.choices.map((c, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleChoice(c)}
-                  className="w-full p-4 bg-slate-800 rounded-xl hover:bg-slate-700"
-                >
-                  {c.text}
-                </button>
-              ))}
-            </div>
-          ) : (
+        {!node.ending ? (
+          <div className="space-y-3">
+            {node.choices.map((c, i) => (
+              <button
+                key={i}
+                onClick={() => handleChoice(c)}
+                className="w-full p-4 bg-slate-800 rounded-xl hover:bg-slate-700"
+              >
+                {c.text}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
             <button
               onClick={restartGame}
               className="w-full p-4 bg-red-600 rounded-xl"
             >
               Play Again
             </button>
-          )}
 
-        </div>
+            {finalReport && (
+              <pre className="text-xs bg-black/40 p-4 rounded-xl whitespace-pre-wrap">
+                {finalReport}
+              </pre>
+            )}
+          </div>
+        )}
+
       </div>
-    </>
+    </div>
   );
 }
