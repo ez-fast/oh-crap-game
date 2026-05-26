@@ -36,13 +36,18 @@ export default function OhCrapGame() {
   const [mode, setMode] = React.useState('calm');
 
   // =========================
-  // BACKGROUNDS
+  // VISUAL ENGINE (NEW)
+  // =========================
+  const visual = {
+    water: state.flood,
+    mode
+  };
+
+  // =========================
+  // BACKGROUNDS (kept minimal, not dominant anymore)
   // =========================
   const backgrounds = {
-    start: "https://images.unsplash.com/photo-1581578731548-c64695cc6952",
-    bathroom: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a",
-    kitchen: "https://images.unsplash.com/photo-1556911220-bff31c812dba",
-    disaster: "https://images.unsplash.com/photo-1523413651479-597eb2da0ad6"
+    start: "linear-gradient(135deg, #0f172a, #020617)",
   };
 
   // =========================
@@ -51,10 +56,10 @@ export default function OhCrapGame() {
   const aiResponse = (chaos) => {
     const responses = [
       "EZ-FAST stabilizes the system instantly.",
-      "Technician isolates the failure point before escalation.",
-      "Emergency bypass prevents further flooding.",
-      "Full restoration completed with no secondary damage.",
-      "Advanced diagnostics prevent a major failure."
+      "Technician isolates failure before escalation.",
+      "Emergency bypass prevents flooding.",
+      "Full restoration completed safely.",
+      "Advanced diagnostics prevent disaster."
     ];
     return responses[Math.min(Math.floor(chaos / 25), responses.length - 1)];
   };
@@ -101,35 +106,16 @@ export default function OhCrapGame() {
       ]
     },
 
-    end_good: {
-      ending: true,
-      title: "Professional Victory",
-      text: "Everything is fixed cleanly and quickly."
-    },
-
-    end_rescue: {
-      ending: true,
-      title: "Narrow Escape",
-      text: "You avoided major damage."
-    },
-
-    end_late: {
-      ending: true,
-      title: "Expensive Lesson",
-      text: "It got fixed… but at a cost."
-    },
-
-    end_bad: {
-      ending: true,
-      title: "TOTAL DISASTER",
-      text: "The house will never be the same."
-    }
+    end_good: { ending: true, title: "Professional Victory", text: "Everything is fixed quickly." },
+    end_rescue: { ending: true, title: "Narrow Escape", text: "You avoided major damage." },
+    end_late: { ending: true, title: "Expensive Lesson", text: "It got fixed… but at a cost." },
+    end_bad: { ending: true, title: "TOTAL DISASTER", text: "The house will never be the same." }
   };
 
   const current = story[node];
 
   // =========================
-  // RANDOM EVENT TRIGGER
+  // RANDOM EVENTS
   // =========================
   const triggerEvent = () => {
     if (Math.random() < 0.35) {
@@ -186,82 +172,118 @@ export default function OhCrapGame() {
     setMode('calm');
   };
 
+  // =========================
+  // VISUAL COLORS
+  // =========================
+  const modeColor =
+    mode === 'calm'
+      ? 'bg-slate-900'
+      : mode === 'warning'
+      ? 'bg-yellow-500/10'
+      : 'bg-red-500/10';
+
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center p-6 text-white transition-all duration-500 ${shake ? "animate-shake" : ""}`}
-      style={{
-        backgroundImage: `url(${backgrounds[node] || backgrounds.start})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center"
-      }}
-    >
+    <div className={`min-h-screen flex items-center justify-center p-6 text-white ${shake ? "animate-shake" : ""}`}>
 
-      {/* DARK OVERLAY */}
-      <div className="absolute inset-0 bg-black/70"></div>
+      {/* MAIN GRID */}
+      <div className="w-full max-w-6xl grid md:grid-cols-2 gap-6">
 
-      {/* FLOOD EFFECT */}
-      {state.flood > 20 && (
-        <div
-          className="absolute bottom-0 left-0 w-full bg-blue-500/20 transition-all duration-700"
-          style={{ height: `${state.flood}%` }}
-        />
-      )}
+        {/* =========================
+            STORY PANEL
+        ========================= */}
+        <div className={`p-8 rounded-3xl border border-slate-700 ${modeColor}`}>
 
-      <div className="relative w-full max-w-4xl bg-slate-900/90 backdrop-blur-xl p-8 rounded-3xl border border-slate-700 z-10">
+          <h1 className="text-3xl font-bold text-red-400 mb-3">
+            {current.title}
+          </h1>
 
-        <h1 className="text-3xl font-bold text-red-400 mb-3">
-          {current.title}
-        </h1>
+          {event && (
+            <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-400 text-yellow-200 rounded-xl">
+              ⚠ {event}
+            </div>
+          )}
 
-        {/* EVENT */}
-        {event && (
-          <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-400 text-yellow-200 rounded-xl">
-            ⚠ {event}
+          <p className="mb-6 text-slate-200 whitespace-pre-line">
+            {current.text}
+          </p>
+
+          <div className="grid grid-cols-3 gap-2 text-xs text-slate-300 mb-6">
+            <div>Damage: {state.damage}</div>
+            <div>Stress: {state.stress}</div>
+            <div>Chaos: {state.chaos}</div>
           </div>
-        )}
 
-        <p className="mb-6 text-slate-200 whitespace-pre-line">
-          {current.text}
-        </p>
+          {!current.ending ? (
+            <div className="space-y-3">
+              {current.choices.map((c, i) => (
+                <button
+                  key={i}
+                  onClick={() => choose(c)}
+                  className="w-full p-4 bg-slate-800/80 hover:bg-slate-700 rounded-xl transition"
+                >
+                  {c.text}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4 text-center">
 
-        {/* HUD */}
-        <div className="grid grid-cols-3 gap-2 text-xs text-slate-300 mb-6">
-          <div>Damage: {state.damage}</div>
-          <div>Stress: {state.stress}</div>
-          <div>Chaos: {state.chaos}</div>
+              <div className="text-green-300 text-lg font-semibold">
+                {aiResponse(state.chaos)}
+              </div>
+
+              <button
+                onClick={reset}
+                className="w-full p-4 bg-red-600 rounded-xl"
+              >
+                Play Again
+              </button>
+
+              <div className="text-xs text-slate-400">
+                Chaos Score: {state.chaos}
+              </div>
+            </div>
+          )}
+
         </div>
 
-        {!current.ending ? (
-          <div className="space-y-3">
-            {current.choices.map((c, i) => (
-              <button
-                key={i}
-                onClick={() => choose(c)}
-                className="w-full p-4 bg-slate-800/80 hover:bg-slate-700 rounded-xl transition"
-              >
-                {c.text}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-4 text-center">
+        {/* =========================
+            ANIMATION PANEL (NEW)
+        ========================= */}
+        <div className="relative bg-black rounded-3xl overflow-hidden border border-slate-700">
 
-            <div className="text-green-300 text-lg font-semibold">
-              {aiResponse(state.chaos)}
+          {/* WATER LEVEL */}
+          <div
+            className="absolute bottom-0 left-0 w-full bg-blue-500/30 transition-all duration-700"
+            style={{ height: `${visual.water}%` }}
+          />
+
+          {/* MODE OVERLAY */}
+          <div className={`absolute inset-0 transition-all duration-500
+            ${visual.mode === 'calm' ? '' : ''}
+            ${visual.mode === 'warning' ? 'bg-yellow-500/10 animate-pulse' : ''}
+            ${visual.mode === 'disaster' ? 'bg-red-500/20 animate-pulse' : ''}
+          `} />
+
+          {/* CENTER CORE VISUAL */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className={`
+              w-44 h-44 border-4 border-slate-500 rounded-full flex items-center justify-center text-xs text-slate-300 text-center
+              transition-all duration-300
+              ${visual.mode === 'disaster' ? 'animate-pulse scale-110 border-red-400' : ''}
+              ${visual.mode === 'warning' ? 'scale-105 border-yellow-400' : ''}
+            `}>
+              PLUMBING SYSTEM<br />
+              MODE: {visual.mode.toUpperCase()}
             </div>
-
-            <button
-              onClick={reset}
-              className="w-full p-4 bg-red-600 rounded-xl"
-            >
-              Play Again
-            </button>
-
-            <div className="text-xs text-slate-400">
-              Chaos Score: {state.chaos}
-            </div>
           </div>
-        )}
+
+          {/* STATUS */}
+          <div className="absolute bottom-4 left-0 w-full text-center text-xs text-slate-400">
+            Water Level: {Math.round(visual.water)}%
+          </div>
+
+        </div>
 
       </div>
     </div>
