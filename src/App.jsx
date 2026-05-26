@@ -13,7 +13,100 @@ export default function OhCrapGame() {
   };
 
   const storyNodes = {
-    kitchenStart: {
+bathroomBackup: {
+  title: "OH CRAP! — Bathroom Backup",
+  text: `
+You flush the toilet upstairs.
+
+You hear a gurgle from the shower drain.
+
+Then... nothing.
+
+Then everything.
+
+The shower starts filling with water from the toilet system.
+  `,
+  choices: [
+    {
+      text: "Call EZ-FAST Plumbing",
+      next: "rescuedEnding",
+      damage: -5,
+      stress: -10,
+      wallet: -350
+    },
+    {
+      text: "Try a plunger in multiple drains",
+      next: "multiDrainDisaster",
+      damage: 20,
+      stress: 25,
+      wallet: -50
+    }
+  ]
+}
+
+multiDrainDisaster: {
+  title: "Cross-Contamination Event",
+  text: `
+You aggressively plunge every drain in the house.
+
+Instead of fixing the issue...
+
+The kitchen sink starts bubbling.
+
+The laundry room floods.
+
+Something you didn't expect is now on the floor.
+  `,
+  choices: [
+    {
+      text: "Call EZ-FAST Plumbing",
+      next: "lateRescueEnding",
+      damage: 10,
+      stress: 10,
+      wallet: -600
+    },
+    {
+      text: "Open the main cleanout yourself",
+      next: "mainLineExplosion",
+      damage: 40,
+      stress: 35,
+      wallet: -120
+    }
+  ]
+}
+
+mainLineExplosion: {
+  title: "MAIN LINE FAILURE",
+  text: `
+You open the cleanout cap.
+
+You were not emotionally prepared for what happens next.
+
+The system immediately reclaims your garage floor.
+
+Everything is now wet.
+
+Everything.
+  `,
+  choices: [
+    {
+      text: "Call EZ-FAST Plumbing immediately",
+      next: "catastropheEnding",
+      damage: 15,
+      stress: 15,
+      wallet: -900
+    },
+    {
+      text: "Accept your new indoor water feature",
+      next: "catastropheEnding",
+      damage: 50,
+      stress: 50,
+      wallet: -2000
+    }
+  ]
+} 
+
+kitchenStart: {
       title: 'OH CRAP! — Garbage Disposal Disaster',
       text: `
 You hear a loud metallic crunch from the kitchen sink.
@@ -253,16 +346,26 @@ The technician politely avoids saying “I told you so.”
   const [wallet, setWallet] = React.useState(0);
   const [floodLevel, setFloodLevel] = React.useState(0);
   const [achievement, setAchievement] = React.useState('');
+  const [shake, setShake] = React.useState(false);
+  const [event, setEvent] = React.useState('');
 
   const node = storyNodes[currentNode];
 
   const handleChoice = (choice) => {
     playSound('click');
 
-    if (choice.damage >= 25) {
-      playSound('disaster');
-    }
+if (Math.random() < 0.35) {
+  const random = randomEvents[Math.floor(Math.random() * randomEvents.length)];
+  setEvent(random);
+} else {
+  setEvent('');
+}
 
+   if (choice.damage >= 25) {
+  setShake(true);
+  playSound('disaster');
+  setTimeout(() => setShake(false), 500);
+}
     if (choice.next.includes('Ending') && choice.damage < 15) {
       playSound('success');
     }
@@ -304,14 +407,22 @@ The technician politely avoids saying “I told you so.”
     return 'bg-red-500';
   };
 
+const randomEvents = [
+  "A neighbor gives unsolicited plumbing advice.",
+  "Your spouse is now supervising you.",
+  "The water pressure suddenly changes.",
+  "You hear dripping... but can't find it.",
+  "The house smells worse than before.",
+  "A YouTube plumber contradicts your plan."
+];
+
   return (
     <>
       <div
-        className="fixed bottom-0 left-0 w-full bg-blue-500/30 pointer-events-none transition-all duration-1000 z-0"
-        style={{ height: `${floodLevel}%` }}
-      ></div>
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white p-6 flex items-center justify-center animate-pulse">
-      <div className="w-full max-w-4xl grid lg:grid-cols-3 gap-6">
+  className="fixed bottom-0 left-0 w-full bg-blue-500/40 pointer-events-none transition-all duration-700 z-0 animate-pulse"
+  style={{ height: `${floodLevel}%` }}
+></div>
+    <div className={`min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white p-6 flex items-center justify-center animate-pulse ${shake ? "animate-shake" : ""}`}>
 
         <div className="lg:col-span-2 bg-slate-900 rounded-3xl shadow-2xl p-8 border border-slate-700 transition-all duration-500 hover:scale-[1.01]">
 
@@ -322,6 +433,12 @@ The technician politely avoids saying “I told you so.”
 
             <div className="h-1 w-32 bg-red-500 mx-auto rounded-full"></div>
           </div>
+
+{event && (
+  <div className="bg-yellow-500/10 border border-yellow-400 text-yellow-200 p-3 rounded-xl mb-4 text-sm">
+    ⚠ {event}
+  </div>
+)}
 
           <div className="whitespace-pre-line text-lg leading-8 text-slate-200 mb-10">
             {node.text}
