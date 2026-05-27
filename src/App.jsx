@@ -3,7 +3,7 @@ import React from 'react';
 export default function OhCrapGame() {
 
   // =========================
-  // SOUND ENGINE V5.6
+  // SOUND ENGINE V6
   // =========================
   const sound = {
     click: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
@@ -27,8 +27,28 @@ export default function OhCrapGame() {
     'laundryStart'
   ];
 
-  const randomStart =
-    startScenarios[Math.floor(Math.random() * startScenarios.length)];
+  const getRandomStart = () => {
+    return startScenarios[
+      Math.floor(Math.random() * startScenarios.length)
+    ];
+  };
+
+  // =========================
+  // RANDOM SPOUSE PERSONALITY
+  // =========================
+  const spouseTypes = [
+    'silently judging you',
+    'already pricing contractors',
+    'opening Zillow again',
+    'documenting everything for insurance',
+    'questioning your confidence level',
+    'deeply unimpressed'
+  ];
+
+  const randomSpouseMood =
+    spouseTypes[
+      Math.floor(Math.random() * spouseTypes.length)
+    ];
 
   // =========================
   // GAME STATE
@@ -41,9 +61,10 @@ export default function OhCrapGame() {
     mistakes: 0
   });
 
-  const [node, setNode] = React.useState(randomStart);
+  const [node, setNode] = React.useState(getRandomStart());
   const [event, setEvent] = React.useState('');
   const [shake, setShake] = React.useState(false);
+  const [flash, setFlash] = React.useState(false);
 
   // =========================
   // RANDOM EVENTS
@@ -55,7 +76,9 @@ export default function OhCrapGame() {
     "Your spouse quietly opens Zillow.",
     "A pipe makes a sound like a submarine hull failing.",
     "You smell something expensive.",
-    "The floor develops a suspicious squish."
+    "The floor develops a suspicious squish.",
+    "The lights flicker for emotional effect.",
+    "You hear water where water should not exist."
   ];
 
   const triggerEvent = () => {
@@ -68,6 +91,30 @@ export default function OhCrapGame() {
     } else {
       setEvent('');
     }
+  };
+
+  // =========================
+  // AI NARRATOR
+  // =========================
+  const narratorCommentary = () => {
+
+    if (state.chaos > 120) {
+      return "The house is now making sounds normally associated with submarines.";
+    }
+
+    if (state.mistakes >= 4) {
+      return "Your confidence continues to exceed your plumbing qualifications.";
+    }
+
+    if (state.damage > 70) {
+      return "Structural integrity is becoming more of a suggestion.";
+    }
+
+    if (state.chaos < 30) {
+      return "This situation is still technically recoverable.";
+    }
+
+    return "The plumbing system remains deeply unconvinced by your strategy.";
   };
 
   // =========================
@@ -101,13 +148,12 @@ export default function OhCrapGame() {
   // =========================
   const story = {
 
-    // ====================================
-    // TOILET START
-    // ====================================
     toiletStart: {
       title: "OH CRAP! — Toilet Overflow",
       comic: "🚽",
-      spouse: "Your spouse stares at the rising toilet water with the expression of someone reconsidering past life choices.",
+
+      spouse: `Your spouse is ${randomSpouseMood}.`,
+
       dog: "The dog begins barking at the bathroom like it detected paranormal activity.",
 
       text: `
@@ -139,13 +185,12 @@ A bubbling sound echoes from somewhere deep inside the walls.
       ]
     },
 
-    // ====================================
-    // KITCHEN START
-    // ====================================
     kitchenStart: {
       title: "OH CRAP! — Kitchen Sink Disaster",
       comic: "🍽️",
-      spouse: "Your spouse asks why the sink sounds like it's digesting gravel.",
+
+      spouse: `Your spouse is ${randomSpouseMood}.`,
+
       dog: "The dog watches the disposal with deep suspicion.",
 
       text: `
@@ -177,48 +222,12 @@ Something black and horrifying floats upward from the drain.
       ]
     },
 
-    kitchenDisaster: {
-      title: "Kitchen Escalation Event",
-      comic: "🧼",
-      spouse: "Your spouse has stopped offering suggestions and started recording evidence.",
-      dog: "The dog retreats behind the couch.",
-
-      text: `
-You attempt several increasingly questionable fixes.
-
-The disposal growls.
-
-The dishwasher starts draining into the sink.
-
-You now appear to be fighting the kitchen itself.
-      `,
-
-      choices: [
-        {
-          text: "Call EZ-FAST Plumbing immediately",
-          next: "rescueEnding",
-          damage: -5,
-          stress: -10,
-          wallet: -450
-        },
-
-        {
-          text: "Continue YouTube-certified repair strategy",
-          next: "disaster",
-          damage: 35,
-          stress: 30,
-          wallet: -150
-        }
-      ]
-    },
-
-    // ====================================
-    // WATER HEATER START
-    // ====================================
     waterHeaterStart: {
       title: "OH CRAP! — Water Heater Leak",
       comic: "🔥",
-      spouse: "Your spouse asks if water heaters are supposed to hiss like snakes.",
+
+      spouse: `Your spouse is ${randomSpouseMood}.`,
+
       dog: "The dog refuses to enter the garage.",
 
       text: `
@@ -228,7 +237,7 @@ The water heater is leaking slowly from the bottom.
 
 A puddle spreads outward with unsettling confidence.
 
-The metal tank makes a noise like it's thinking dangerous thoughts.
+The metal tank makes a noise like it's planning something violent.
       `,
 
       choices: [
@@ -241,7 +250,7 @@ The metal tank makes a noise like it's thinking dangerous thoughts.
         },
 
         {
-          text: "Tap it and pretend you understand plumbing",
+          text: "Tap random valves confidently",
           next: "heaterDisaster",
           damage: 25,
           stress: 20,
@@ -250,50 +259,12 @@ The metal tank makes a noise like it's thinking dangerous thoughts.
       ]
     },
 
-    heaterDisaster: {
-      title: "Boiler Confidence Event",
-      comic: "💦",
-      spouse: "Your spouse asks if shutting off the house water might have been step one.",
-      dog: "The dog now sits outside the garage monitoring you from a safe distance.",
-
-      text: `
-You adjust several valves with increasing confidence.
-
-This confidence is not supported by engineering.
-
-The leak becomes more aggressive.
-
-Steam appears.
-
-Nothing about this feels legal anymore.
-      `,
-
-      choices: [
-        {
-          text: "Call EZ-FAST before this becomes newsworthy",
-          next: "lateEnding",
-          damage: 5,
-          stress: -5,
-          wallet: -700
-        },
-
-        {
-          text: "Keep adjusting random valves",
-          next: "badEnding",
-          damage: 60,
-          stress: 60,
-          wallet: -2400
-        }
-      ]
-    },
-
-    // ====================================
-    // LAUNDRY START
-    // ====================================
     laundryStart: {
       title: "OH CRAP! — Laundry Room Flood",
       comic: "🧺",
-      spouse: "Your spouse asks why the laundry room sounds like Niagara Falls.",
+
+      spouse: `Your spouse is ${randomSpouseMood}.`,
+
       dog: "The dog refuses to step onto the wet floor and now judges you from afar.",
 
       text: `
@@ -325,48 +296,12 @@ Water pours across the floor toward the hallway.
       ]
     },
 
-    laundryDisaster: {
-      title: "Laundry System Collapse",
-      comic: "🌊",
-      spouse: "Your spouse says: 'Please stop helping.'",
-      dog: "The dog has relocated upstairs and refuses eye contact.",
-
-      text: `
-You attempt to stop the leak using towels, optimism, and panic.
-
-The drain overflows.
-
-The machine vibrates violently.
-
-You are now essentially losing a fight against socks and water.
-      `,
-
-      choices: [
-        {
-          text: "Call EZ-FAST and surrender",
-          next: "rescueEnding",
-          damage: -5,
-          stress: -8,
-          wallet: -500
-        },
-
-        {
-          text: "Keep troubleshooting emotionally",
-          next: "disaster",
-          damage: 40,
-          stress: 35,
-          wallet: -220
-        }
-      ]
-    },
-
-    // ====================================
-    // MAIN DISASTER PATH
-    // ====================================
     bathroom: {
       title: "Bathroom Escalation Event",
       comic: "🌊",
+
       spouse: "Your spouse asks if you've 'actually done this before' in a tone that already knows the answer.",
+
       dog: "The dog refuses to cross the bathroom doorway.",
 
       text: `
@@ -400,10 +335,125 @@ The bathroom now sounds like a swamp having an argument.
       ]
     },
 
+    kitchenDisaster: {
+      title: "Kitchen Escalation Event",
+      comic: "🧼",
+
+      spouse: "Your spouse has stopped offering suggestions and started recording evidence.",
+
+      dog: "The dog retreats behind the couch.",
+
+      text: `
+You attempt several increasingly questionable fixes.
+
+The disposal growls.
+
+The dishwasher starts draining into the sink.
+
+You now appear to be fighting the kitchen itself.
+      `,
+
+      choices: [
+        {
+          text: "Call EZ-FAST Plumbing immediately",
+          next: "rescueEnding",
+          damage: -5,
+          stress: -10,
+          wallet: -450
+        },
+
+        {
+          text: "Continue YouTube-certified repair strategy",
+          next: "disaster",
+          damage: 35,
+          stress: 30,
+          wallet: -150
+        }
+      ]
+    },
+
+    heaterDisaster: {
+      title: "Boiler Confidence Event",
+      comic: "💦",
+
+      spouse: "Your spouse asks if shutting off the house water might have been step one.",
+
+      dog: "The dog now sits outside the garage monitoring you from a safe distance.",
+
+      text: `
+You adjust several valves with increasing confidence.
+
+This confidence is not supported by engineering.
+
+The leak becomes more aggressive.
+
+Steam appears.
+
+Nothing about this feels legal anymore.
+      `,
+
+      choices: [
+        {
+          text: "Call EZ-FAST before this becomes newsworthy",
+          next: "lateEnding",
+          damage: 5,
+          stress: -5,
+          wallet: -700
+        },
+
+        {
+          text: "Keep adjusting random valves",
+          next: "badEnding",
+          damage: 60,
+          stress: 60,
+          wallet: -2400
+        }
+      ]
+    },
+
+    laundryDisaster: {
+      title: "Laundry System Collapse",
+      comic: "🌊",
+
+      spouse: "Your spouse says: 'Please stop helping.'",
+
+      dog: "The dog has relocated upstairs and refuses eye contact.",
+
+      text: `
+You attempt to stop the leak using towels, optimism, and panic.
+
+The drain overflows.
+
+The machine vibrates violently.
+
+You are now essentially losing a fight against socks and water.
+      `,
+
+      choices: [
+        {
+          text: "Call EZ-FAST and surrender",
+          next: "rescueEnding",
+          damage: -5,
+          stress: -8,
+          wallet: -500
+        },
+
+        {
+          text: "Keep troubleshooting emotionally",
+          next: "disaster",
+          damage: 40,
+          stress: 35,
+          wallet: -220
+        }
+      ]
+    },
+
     disaster: {
       title: "SYSTEM FAILURE",
       comic: "💥",
+
       spouse: "Your spouse has stopped speaking entirely, which somehow feels worse.",
+
       dog: "The dog relocates to the farthest corner of the house.",
 
       text: `
@@ -437,9 +487,9 @@ You now understand why professional plumbers charge what they charge.
       ]
     },
 
-    // ====================================
+    // =========================
     // ENDINGS
-    // ====================================
+    // =========================
     goodEnding: {
       ending: true,
       title: "Professional Victory",
@@ -506,6 +556,23 @@ The ceiling develops opinions.
   const current = story[node];
 
   // =========================
+  // ACHIEVEMENTS
+  // =========================
+  const achievements = [];
+
+  if (state.mistakes >= 3) {
+    achievements.push("🧠 DIY Confidence Expert");
+  }
+
+  if (state.wallet <= -2000) {
+    achievements.push("💸 Financial Catastrophe");
+  }
+
+  if (state.chaos >= 120) {
+    achievements.push("🌊 Indoor Water Park Creator");
+  }
+
+  // =========================
   // CHOICE ENGINE
   // =========================
   const choose = (choice) => {
@@ -516,11 +583,17 @@ The ceiling develops opinions.
     if (choice.damage >= 30) {
 
       setShake(true);
+      setFlash(true);
+
       play('disaster');
 
       setTimeout(() => {
         setShake(false);
       }, 500);
+
+      setTimeout(() => {
+        setFlash(false);
+      }, 300);
     }
 
     if (choice.next.includes("Ending")) {
@@ -553,11 +626,6 @@ The ceiling develops opinions.
   // =========================
   const reset = () => {
 
-    const newStart =
-      startScenarios[
-        Math.floor(Math.random() * startScenarios.length)
-      ];
-
     setState({
       chaos: 0,
       stress: 0,
@@ -566,7 +634,7 @@ The ceiling develops opinions.
       mistakes: 0
     });
 
-    setNode(newStart);
+    setNode(getRandomStart());
     setEvent('');
   };
 
@@ -575,106 +643,27 @@ The ceiling develops opinions.
   // =========================
   const ComicPanel = () => {
 
-    const panels = {
+    return (
+      <div className="flex flex-col items-center justify-center text-center w-full">
 
-      toiletStart: {
-        icon: "🚽",
-        status: "Toilet confidence declining rapidly.",
-        color: "blue"
-      },
+        <div className="relative mb-8">
 
-      kitchenStart: {
-        icon: "🍽️",
-        status: "Disposal making forbidden noises.",
-        color: "yellow"
-      },
+          <div className="absolute inset-0 blur-3xl opacity-30 bg-cyan-400 rounded-full animate-pulse"></div>
 
-      waterHeaterStart: {
-        icon: "🔥",
-        status: "Tank pressure emotionally unstable.",
-        color: "orange"
-      },
-
-      laundryStart: {
-        icon: "🧺",
-        status: "Laundry room becoming aquarium.",
-        color: "cyan"
-      },
-
-      bathroom: {
-        icon: "🌊",
-        status: "Multiple drains now involved.",
-        color: "yellow"
-      },
-
-      kitchenDisaster: {
-        icon: "🧼",
-        status: "Kitchen entering combat phase.",
-        color: "orange"
-      },
-
-      heaterDisaster: {
-        icon: "💦",
-        status: "Steam levels concerning.",
-        color: "orange"
-      },
-
-      laundryDisaster: {
-        icon: "🌊",
-        status: "Water spreading strategically.",
-        color: "cyan"
-      },
-
-      disaster: {
-        icon: "💥",
-        status: "Structural confidence collapsing.",
-        color: "red"
-      }
-    };
-
-    const panel = panels[node];
-
-    if (!panel) {
-      return (
-        <div className="flex flex-col items-center text-center">
-          <div className="text-8xl animate-pulse">
+          <div className="relative text-[10rem] floating">
             {current.comic}
           </div>
 
-          <div className="mt-6 bg-green-500/10 border border-green-400 rounded-2xl p-4">
-            <div className="text-green-300 font-bold mb-2">
-              EZ-FAST STATUS
-            </div>
-
-            <div className="text-slate-300 text-sm">
-              Situation stabilized.
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex flex-col items-center text-center">
-
-        <div className="text-9xl animate-bounce">
-          {panel.icon}
         </div>
 
-        <div className={`mt-8 border rounded-2xl p-5 w-full max-w-sm
-          ${panel.color === 'red' ? 'bg-red-500/10 border-red-400' : ''}
-          ${panel.color === 'orange' ? 'bg-orange-500/10 border-orange-400' : ''}
-          ${panel.color === 'yellow' ? 'bg-yellow-500/10 border-yellow-400' : ''}
-          ${panel.color === 'cyan' ? 'bg-cyan-500/10 border-cyan-400' : ''}
-          ${panel.color === 'blue' ? 'bg-blue-500/10 border-blue-400' : ''}
-        `}>
+        <div className="bg-slate-800 border border-slate-700 rounded-3xl p-6 w-full max-w-md">
 
-          <div className="text-white font-black mb-2">
+          <div className="text-cyan-300 font-black mb-3 text-lg">
             SYSTEM STATUS
           </div>
 
-          <div className="text-slate-300 text-sm">
-            {panel.status}
+          <div className="text-slate-300 leading-7">
+            {narratorCommentary()}
           </div>
 
         </div>
@@ -685,12 +674,17 @@ The ceiling develops opinions.
 
   return (
 
-    <div className={`min-h-screen bg-slate-950 text-white p-6 flex items-center justify-center ${shake ? 'animate-shake' : ''}`}>
+    <div className={`min-h-screen bg-slate-950 text-white p-6 flex items-center justify-center overflow-hidden ${shake ? 'animate-shake' : ''}`}>
+
+      {/* FLASH EFFECT */}
+      {flash && (
+        <div className="fixed inset-0 bg-red-500/20 pointer-events-none z-50 animate-pulse"></div>
+      )}
 
       <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        {/* MAIN STORY PANEL */}
-        <div className="bg-slate-900 border border-slate-700 rounded-3xl p-8 flex flex-col min-h-[700px]">
+        {/* MAIN PANEL */}
+        <div className="bg-slate-900 border border-slate-700 rounded-3xl p-8 flex flex-col min-h-[760px]">
 
           {/* TITLE */}
           <h1 className="text-4xl font-black text-red-400 mb-6">
@@ -776,23 +770,94 @@ The ceiling develops opinions.
 
           </div>
 
-          {/* PUSH CONTENT */}
-          <div className="flex-grow"></div>
+          {/* CHAOS BAR */}
+          <div className="mb-8">
 
-          {/* EZ FAST BOTTOM */}
-          {current.ending && (
+            <div className="flex justify-between text-sm mb-2">
 
-            <div className="bg-green-500/10 border border-green-400 rounded-2xl p-5 mb-6">
+              <span className="text-red-300 font-bold">
+                CHAOS LEVEL
+              </span>
 
-              <div className="text-green-300 font-black mb-2">
-                🛠️ EZ-FAST RESOLUTION
-              </div>
-
-              <div className="text-slate-200 leading-7">
-                {ezFastResponse()}
-              </div>
+              <span className="text-slate-400">
+                {state.chaos}%
+              </span>
 
             </div>
+
+            <div className="w-full h-5 bg-slate-800 rounded-full overflow-hidden">
+
+              <div
+                className={`h-full transition-all duration-700
+                  ${state.chaos < 40 ? 'bg-green-500' : ''}
+                  ${state.chaos >= 40 && state.chaos < 90 ? 'bg-yellow-500' : ''}
+                  ${state.chaos >= 90 ? 'bg-red-500 animate-pulse' : ''}
+                `}
+                style={{
+                  width: `${Math.min(state.chaos, 100)}%`
+                }}
+              />
+
+            </div>
+
+          </div>
+
+          {/* AI NARRATOR */}
+          <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 mb-6">
+
+            <div className="text-cyan-300 font-bold mb-2">
+              🤖 AI NARRATOR
+            </div>
+
+            <div className="text-slate-300 text-sm italic">
+              {narratorCommentary()}
+            </div>
+
+          </div>
+
+          <div className="flex-grow"></div>
+
+          {/* ENDING */}
+          {current.ending && (
+
+            <>
+              <div className="bg-green-500/10 border border-green-400 rounded-2xl p-5 mb-6">
+
+                <div className="text-green-300 font-black mb-2">
+                  🛠️ EZ-FAST RESOLUTION
+                </div>
+
+                <div className="text-slate-200 leading-7">
+                  {ezFastResponse()}
+                </div>
+
+              </div>
+
+              {achievements.length > 0 && (
+
+                <div className="bg-yellow-500/10 border border-yellow-400 rounded-2xl p-5 mb-6">
+
+                  <div className="text-yellow-300 font-black mb-3">
+                    🏆 ACHIEVEMENTS
+                  </div>
+
+                  <div className="space-y-2">
+
+                    {achievements.map((a, i) => (
+                      <div
+                        key={i}
+                        className="bg-slate-800 rounded-xl p-3"
+                      >
+                        {a}
+                      </div>
+                    ))}
+
+                  </div>
+
+                </div>
+              )}
+
+            </>
           )}
 
           {/* BUTTONS */}
@@ -828,7 +893,7 @@ The ceiling develops opinions.
         </div>
 
         {/* COMIC PANEL */}
-        <div className="bg-slate-900 border border-slate-700 rounded-3xl p-8 flex items-center justify-center min-h-[700px]">
+        <div className="bg-slate-900 border border-slate-700 rounded-3xl p-8 flex items-center justify-center min-h-[760px]">
 
           <ComicPanel />
 

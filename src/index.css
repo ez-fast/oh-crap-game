@@ -23,3 +23,9 @@
 .animate-flood {
   animation: flood 1s ease-in-out;
 }
+
+@keyframes waterRise {
+  from { height: 0%; }
+  to { height: 100%; }
+}
+
