@@ -1,6 +1,3 @@
-# App.jsx (Complete Copy/Paste Version)
-
-```jsx
 import React from 'react';
 
 // =========================
