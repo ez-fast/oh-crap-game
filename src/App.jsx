@@ -3,7 +3,7 @@ import React from 'react';
 export default function OhCrapGame() {
 
   // =========================
-  // SOUND ENGINE V5.5
+  // SOUND ENGINE V5.6
   // =========================
   const sound = {
     click: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
@@ -18,6 +18,19 @@ export default function OhCrapGame() {
   };
 
   // =========================
+  // RANDOM STARTS
+  // =========================
+  const startScenarios = [
+    'toiletStart',
+    'kitchenStart',
+    'waterHeaterStart',
+    'laundryStart'
+  ];
+
+  const randomStart =
+    startScenarios[Math.floor(Math.random() * startScenarios.length)];
+
+  // =========================
   // GAME STATE
   // =========================
   const [state, setState] = React.useState({
@@ -28,7 +41,7 @@ export default function OhCrapGame() {
     mistakes: 0
   });
 
-  const [node, setNode] = React.useState('start');
+  const [node, setNode] = React.useState(randomStart);
   const [event, setEvent] = React.useState('');
   const [shake, setShake] = React.useState(false);
 
@@ -40,27 +53,42 @@ export default function OhCrapGame() {
     "The dog suddenly leaves the room at high speed.",
     "Something inside the wall makes a deeply concerning noise.",
     "Your spouse quietly opens Zillow.",
-    "A pipe makes a sound like a submarine hull failing."
+    "A pipe makes a sound like a submarine hull failing.",
+    "You smell something expensive.",
+    "The floor develops a suspicious squish."
   ];
 
   const triggerEvent = () => {
     if (Math.random() < 0.45) {
-      setEvent(randomEvents[Math.floor(Math.random() * randomEvents.length)]);
+      setEvent(
+        randomEvents[
+          Math.floor(Math.random() * randomEvents.length)
+        ]
+      );
     } else {
       setEvent('');
     }
   };
 
   // =========================
-  // EZ-FAST AI CHARACTER
+  // EZ-FAST AI RESPONSE ENGINE
   // =========================
   const ezFastResponse = () => {
+
     const responses = [
       "EZ-FAST arrives, surveys the scene, and nods with the exhaustion of someone who has seen this exact confidence before.",
+
       "The technician fixes the issue in 18 minutes and politely avoids asking why you touched the cleanout pipe.",
+
       "EZ-FAST restores order while your spouse watches silently like this is a courtroom proceeding.",
+
       "The technician immediately identifies the issue and says: 'Ah. A classic DIY escalation event.'",
-      "EZ-FAST stabilizes the system before the house can evolve into an indoor water park."
+
+      "EZ-FAST stabilizes the system before the house can evolve into an indoor water park.",
+
+      "The plumber walks in, takes one look, and says: 'Well... at least you stopped eventually.'",
+
+      "A senior technician restores normal water pressure while your dog finally exits witness protection."
     ];
 
     return responses[
@@ -73,11 +101,15 @@ export default function OhCrapGame() {
   // =========================
   const story = {
 
-    start: {
+    // ====================================
+    // TOILET START
+    // ====================================
+    toiletStart: {
       title: "OH CRAP! — Toilet Overflow",
       comic: "🚽",
       spouse: "Your spouse stares at the rising toilet water with the expression of someone reconsidering past life choices.",
       dog: "The dog begins barking at the bathroom like it detected paranormal activity.",
+
       text: `
 You flush the upstairs toilet.
 
@@ -87,6 +119,7 @@ Then the bowl slowly fills to the top like the house itself is thinking about re
 
 A bubbling sound echoes from somewhere deep inside the walls.
       `,
+
       choices: [
         {
           text: "Call EZ-FAST Plumbing",
@@ -95,6 +128,7 @@ A bubbling sound echoes from somewhere deep inside the walls.
           stress: -15,
           wallet: -250
         },
+
         {
           text: "Attempt confident DIY repair",
           next: "bathroom",
@@ -105,11 +139,236 @@ A bubbling sound echoes from somewhere deep inside the walls.
       ]
     },
 
+    // ====================================
+    // KITCHEN START
+    // ====================================
+    kitchenStart: {
+      title: "OH CRAP! — Kitchen Sink Disaster",
+      comic: "🍽️",
+      spouse: "Your spouse asks why the sink sounds like it's digesting gravel.",
+      dog: "The dog watches the disposal with deep suspicion.",
+
+      text: `
+You turn on the garbage disposal.
+
+It immediately makes a sound like a motorcycle crashing into cookware.
+
+The sink backs up instantly.
+
+Something black and horrifying floats upward from the drain.
+      `,
+
+      choices: [
+        {
+          text: "Call EZ-FAST Plumbing",
+          next: "goodEnding",
+          damage: -10,
+          stress: -10,
+          wallet: -280
+        },
+
+        {
+          text: "Reach into disposal like a maniac",
+          next: "kitchenDisaster",
+          damage: 20,
+          stress: 25,
+          wallet: -40
+        }
+      ]
+    },
+
+    kitchenDisaster: {
+      title: "Kitchen Escalation Event",
+      comic: "🧼",
+      spouse: "Your spouse has stopped offering suggestions and started recording evidence.",
+      dog: "The dog retreats behind the couch.",
+
+      text: `
+You attempt several increasingly questionable fixes.
+
+The disposal growls.
+
+The dishwasher starts draining into the sink.
+
+You now appear to be fighting the kitchen itself.
+      `,
+
+      choices: [
+        {
+          text: "Call EZ-FAST Plumbing immediately",
+          next: "rescueEnding",
+          damage: -5,
+          stress: -10,
+          wallet: -450
+        },
+
+        {
+          text: "Continue YouTube-certified repair strategy",
+          next: "disaster",
+          damage: 35,
+          stress: 30,
+          wallet: -150
+        }
+      ]
+    },
+
+    // ====================================
+    // WATER HEATER START
+    // ====================================
+    waterHeaterStart: {
+      title: "OH CRAP! — Water Heater Leak",
+      comic: "🔥",
+      spouse: "Your spouse asks if water heaters are supposed to hiss like snakes.",
+      dog: "The dog refuses to enter the garage.",
+
+      text: `
+You hear a faint hissing sound in the garage.
+
+The water heater is leaking slowly from the bottom.
+
+A puddle spreads outward with unsettling confidence.
+
+The metal tank makes a noise like it's thinking dangerous thoughts.
+      `,
+
+      choices: [
+        {
+          text: "Call EZ-FAST Plumbing",
+          next: "goodEnding",
+          damage: -10,
+          stress: -12,
+          wallet: -320
+        },
+
+        {
+          text: "Tap it and pretend you understand plumbing",
+          next: "heaterDisaster",
+          damage: 25,
+          stress: 20,
+          wallet: -20
+        }
+      ]
+    },
+
+    heaterDisaster: {
+      title: "Boiler Confidence Event",
+      comic: "💦",
+      spouse: "Your spouse asks if shutting off the house water might have been step one.",
+      dog: "The dog now sits outside the garage monitoring you from a safe distance.",
+
+      text: `
+You adjust several valves with increasing confidence.
+
+This confidence is not supported by engineering.
+
+The leak becomes more aggressive.
+
+Steam appears.
+
+Nothing about this feels legal anymore.
+      `,
+
+      choices: [
+        {
+          text: "Call EZ-FAST before this becomes newsworthy",
+          next: "lateEnding",
+          damage: 5,
+          stress: -5,
+          wallet: -700
+        },
+
+        {
+          text: "Keep adjusting random valves",
+          next: "badEnding",
+          damage: 60,
+          stress: 60,
+          wallet: -2400
+        }
+      ]
+    },
+
+    // ====================================
+    // LAUNDRY START
+    // ====================================
+    laundryStart: {
+      title: "OH CRAP! — Laundry Room Flood",
+      comic: "🧺",
+      spouse: "Your spouse asks why the laundry room sounds like Niagara Falls.",
+      dog: "The dog refuses to step onto the wet floor and now judges you from afar.",
+
+      text: `
+You start a load of laundry.
+
+Ten minutes later, you hear splashing.
+
+The washing machine has apparently decided to reject modern civilization.
+
+Water pours across the floor toward the hallway.
+      `,
+
+      choices: [
+        {
+          text: "Call EZ-FAST Plumbing",
+          next: "goodEnding",
+          damage: -8,
+          stress: -10,
+          wallet: -260
+        },
+
+        {
+          text: "Attempt emergency towel engineering",
+          next: "laundryDisaster",
+          damage: 20,
+          stress: 25,
+          wallet: -35
+        }
+      ]
+    },
+
+    laundryDisaster: {
+      title: "Laundry System Collapse",
+      comic: "🌊",
+      spouse: "Your spouse says: 'Please stop helping.'",
+      dog: "The dog has relocated upstairs and refuses eye contact.",
+
+      text: `
+You attempt to stop the leak using towels, optimism, and panic.
+
+The drain overflows.
+
+The machine vibrates violently.
+
+You are now essentially losing a fight against socks and water.
+      `,
+
+      choices: [
+        {
+          text: "Call EZ-FAST and surrender",
+          next: "rescueEnding",
+          damage: -5,
+          stress: -8,
+          wallet: -500
+        },
+
+        {
+          text: "Keep troubleshooting emotionally",
+          next: "disaster",
+          damage: 40,
+          stress: 35,
+          wallet: -220
+        }
+      ]
+    },
+
+    // ====================================
+    // MAIN DISASTER PATH
+    // ====================================
     bathroom: {
       title: "Bathroom Escalation Event",
       comic: "🌊",
       spouse: "Your spouse asks if you've 'actually done this before' in a tone that already knows the answer.",
       dog: "The dog refuses to cross the bathroom doorway.",
+
       text: `
 You begin plunging aggressively.
 
@@ -121,6 +380,7 @@ Then the sink joins in.
 
 The bathroom now sounds like a swamp having an argument.
       `,
+
       choices: [
         {
           text: "Call EZ-FAST Plumbing",
@@ -129,6 +389,7 @@ The bathroom now sounds like a swamp having an argument.
           stress: -10,
           wallet: -400
         },
+
         {
           text: "Continue DIY experiment",
           next: "disaster",
@@ -144,6 +405,7 @@ The bathroom now sounds like a swamp having an argument.
       comic: "💥",
       spouse: "Your spouse has stopped speaking entirely, which somehow feels worse.",
       dog: "The dog relocates to the farthest corner of the house.",
+
       text: `
 You remove a pipe you were emotionally unprepared to remove.
 
@@ -155,6 +417,7 @@ Something hits the ceiling.
 
 You now understand why professional plumbers charge what they charge.
       `,
+
       choices: [
         {
           text: "Call EZ-FAST Plumbing and admit defeat",
@@ -163,6 +426,7 @@ You now understand why professional plumbers charge what they charge.
           stress: 10,
           wallet: -850
         },
+
         {
           text: "Keep going somehow",
           next: "badEnding",
@@ -173,15 +437,16 @@ You now understand why professional plumbers charge what they charge.
       ]
     },
 
-    // =========================
+    // ====================================
     // ENDINGS
-    // =========================
+    // ====================================
     goodEnding: {
       ending: true,
       title: "Professional Victory",
       comic: "🛠️",
       spouse: "Your spouse regains partial confidence in your decision-making abilities.",
       dog: "The dog cautiously returns to the hallway.",
+
       text: `
 You wisely stop before things become catastrophic.
 
@@ -197,6 +462,7 @@ For now.
       comic: "🚰",
       spouse: "Your spouse immediately claims they suggested calling a professional earlier.",
       dog: "The dog watches the plumber with deep respect.",
+
       text: `
 You narrowly avoid structural water damage.
 
@@ -212,6 +478,7 @@ Emotionally? Less clear.
       comic: "💸",
       spouse: "Your spouse now supervises all future home improvement discussions.",
       dog: "The dog no longer trusts loud plumbing noises.",
+
       text: `
 The repairs are successful.
 
@@ -225,6 +492,7 @@ Unfortunately, so is the invoice.
       comic: "🔥",
       spouse: "Your spouse begins researching tiny homes.",
       dog: "The dog has emotionally detached from the family.",
+
       text: `
 Water enters rooms that should never contain water.
 
@@ -246,6 +514,7 @@ The ceiling develops opinions.
     triggerEvent();
 
     if (choice.damage >= 30) {
+
       setShake(true);
       play('disaster');
 
@@ -263,12 +532,17 @@ The ceiling develops opinions.
       stress: prev.stress + choice.stress,
       damage: prev.damage + choice.damage,
       wallet: prev.wallet + choice.wallet,
-      mistakes: prev.mistakes + (
-        choice.text.toLowerCase().includes("diy") ||
-        choice.text.toLowerCase().includes("keep going")
-          ? 1
-          : 0
-      )
+
+      mistakes:
+        prev.mistakes +
+        (
+          choice.text.toLowerCase().includes("diy") ||
+          choice.text.toLowerCase().includes("keep") ||
+          choice.text.toLowerCase().includes("random") ||
+          choice.text.toLowerCase().includes("towel")
+            ? 1
+            : 0
+        )
     }));
 
     setNode(choice.next);
@@ -279,6 +553,11 @@ The ceiling develops opinions.
   // =========================
   const reset = () => {
 
+    const newStart =
+      startScenarios[
+        Math.floor(Math.random() * startScenarios.length)
+      ];
+
     setState({
       chaos: 0,
       stress: 0,
@@ -287,63 +566,88 @@ The ceiling develops opinions.
       mistakes: 0
     });
 
-    setNode('start');
+    setNode(newStart);
     setEvent('');
   };
 
   // =========================
-  // VISUAL PANEL
+  // COMIC PANEL
   // =========================
   const ComicPanel = () => {
 
-    if (node === 'start') {
+    const panels = {
+
+      toiletStart: {
+        icon: "🚽",
+        status: "Toilet confidence declining rapidly.",
+        color: "blue"
+      },
+
+      kitchenStart: {
+        icon: "🍽️",
+        status: "Disposal making forbidden noises.",
+        color: "yellow"
+      },
+
+      waterHeaterStart: {
+        icon: "🔥",
+        status: "Tank pressure emotionally unstable.",
+        color: "orange"
+      },
+
+      laundryStart: {
+        icon: "🧺",
+        status: "Laundry room becoming aquarium.",
+        color: "cyan"
+      },
+
+      bathroom: {
+        icon: "🌊",
+        status: "Multiple drains now involved.",
+        color: "yellow"
+      },
+
+      kitchenDisaster: {
+        icon: "🧼",
+        status: "Kitchen entering combat phase.",
+        color: "orange"
+      },
+
+      heaterDisaster: {
+        icon: "💦",
+        status: "Steam levels concerning.",
+        color: "orange"
+      },
+
+      laundryDisaster: {
+        icon: "🌊",
+        status: "Water spreading strategically.",
+        color: "cyan"
+      },
+
+      disaster: {
+        icon: "💥",
+        status: "Structural confidence collapsing.",
+        color: "red"
+      }
+    };
+
+    const panel = panels[node];
+
+    if (!panel) {
       return (
         <div className="flex flex-col items-center text-center">
-          <div className="text-8xl animate-bounce">🚽</div>
-
-          <div className="mt-6 bg-blue-500/10 border border-blue-400 rounded-2xl p-4">
-            <div className="text-blue-300 font-bold mb-2">
-              PIPE STATUS
-            </div>
-
-            <div className="text-slate-300 text-sm">
-              Pressure increasing...
-            </div>
+          <div className="text-8xl animate-pulse">
+            {current.comic}
           </div>
-        </div>
-      );
-    }
 
-    if (node === 'bathroom') {
-      return (
-        <div className="flex flex-col items-center text-center">
-          <div className="text-8xl animate-pulse">🌊</div>
-
-          <div className="mt-6 bg-yellow-500/10 border border-yellow-400 rounded-2xl p-4">
-            <div className="text-yellow-300 font-bold mb-2">
-              SITUATION
+          <div className="mt-6 bg-green-500/10 border border-green-400 rounded-2xl p-4">
+            <div className="text-green-300 font-bold mb-2">
+              EZ-FAST STATUS
             </div>
 
             <div className="text-slate-300 text-sm">
-              Multiple drains are now participating.
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (node === 'disaster') {
-      return (
-        <div className="flex flex-col items-center text-center">
-          <div className="text-8xl animate-ping">💥</div>
-
-          <div className="mt-6 bg-red-500/10 border border-red-400 rounded-2xl p-4">
-            <div className="text-red-300 font-bold mb-2">
-              HOUSE STATUS
-            </div>
-
-            <div className="text-slate-300 text-sm">
-              Structural confidence declining rapidly.
+              Situation stabilized.
             </div>
           </div>
         </div>
@@ -352,19 +656,29 @@ The ceiling develops opinions.
 
     return (
       <div className="flex flex-col items-center text-center">
-        <div className="text-8xl animate-pulse">
-          {current.comic}
+
+        <div className="text-9xl animate-bounce">
+          {panel.icon}
         </div>
 
-        <div className="mt-6 bg-green-500/10 border border-green-400 rounded-2xl p-4">
-          <div className="text-green-300 font-bold mb-2">
-            EZ-FAST STATUS
+        <div className={`mt-8 border rounded-2xl p-5 w-full max-w-sm
+          ${panel.color === 'red' ? 'bg-red-500/10 border-red-400' : ''}
+          ${panel.color === 'orange' ? 'bg-orange-500/10 border-orange-400' : ''}
+          ${panel.color === 'yellow' ? 'bg-yellow-500/10 border-yellow-400' : ''}
+          ${panel.color === 'cyan' ? 'bg-cyan-500/10 border-cyan-400' : ''}
+          ${panel.color === 'blue' ? 'bg-blue-500/10 border-blue-400' : ''}
+        `}>
+
+          <div className="text-white font-black mb-2">
+            SYSTEM STATUS
           </div>
 
           <div className="text-slate-300 text-sm">
-            Situation stabilized.
+            {panel.status}
           </div>
+
         </div>
+
       </div>
     );
   };
@@ -462,11 +776,12 @@ The ceiling develops opinions.
 
           </div>
 
-          {/* PUSH EVERYTHING BELOW */}
+          {/* PUSH CONTENT */}
           <div className="flex-grow"></div>
 
-          {/* EZ-FAST RESPONSE BOTTOM */}
+          {/* EZ FAST BOTTOM */}
           {current.ending && (
+
             <div className="bg-green-500/10 border border-green-400 rounded-2xl p-5 mb-6">
 
               <div className="text-green-300 font-black mb-2">
@@ -480,11 +795,13 @@ The ceiling develops opinions.
             </div>
           )}
 
-          {/* BUTTONS ALWAYS BOTTOM */}
+          {/* BUTTONS */}
           {!current.ending ? (
+
             <div className="space-y-4">
 
               {current.choices.map((choice, i) => (
+
                 <button
                   key={i}
                   onClick={() => choose(choice)}
@@ -492,21 +809,25 @@ The ceiling develops opinions.
                 >
                   {choice.text}
                 </button>
+
               ))}
 
             </div>
+
           ) : (
+
             <button
               onClick={reset}
               className="w-full p-5 bg-red-600 hover:bg-red-500 rounded-2xl font-black text-lg transition-all duration-200"
             >
               PLAY AGAIN
             </button>
+
           )}
 
         </div>
 
-        {/* COMIC VISUAL PANEL */}
+        {/* COMIC PANEL */}
         <div className="bg-slate-900 border border-slate-700 rounded-3xl p-8 flex items-center justify-center min-h-[700px]">
 
           <ComicPanel />
@@ -514,6 +835,7 @@ The ceiling develops opinions.
         </div>
 
       </div>
+
     </div>
   );
 }
